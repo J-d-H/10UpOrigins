@@ -19,7 +19,8 @@ class Main {
 	public static inline var scaling: Int = 1;
 	public static inline var tileWidth: Int = 32;
 	public static inline var tileHeight: Int = 32;
-	private static inline var borderArea: Int = 32;
+	private static inline var scrollArea: Int = 32;
+	private static inline var scrollSpeed: Int = 5;
 	private static var tilemap: Tilemap;
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
@@ -27,8 +28,8 @@ class Main {
 	private static var backbuffer: Image;
 
     static var lastTime = 0.0;
-	private static var mouseOnLeftBorder: Bool = false;
-	private static var mouseOnRightBorder: Bool = false;
+	private static var mousePosX: Int = Std.int(width / 2);
+	private static var mousePosY: Int = Std.int(height / 2);
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
 		
@@ -39,8 +40,8 @@ class Main {
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
-		mouseOnLeftBorder = x < borderArea;
-		mouseOnRightBorder = x > width - borderArea;
+		mousePosX = x;
+		mousePosY = y;
 	}
 
 	private static function onMouseWheel(delta: Int): Void {
@@ -53,6 +54,7 @@ class Main {
 		lastTime = Scheduler.time();
 		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
 		initLevel();
+		Scene.the.camx = Std.int(width / 2);
 	}
 	
 	public static function initLevel(): Void {
@@ -85,7 +87,6 @@ class Main {
 			sprites.push(blob.readS32BE(fileIndex)); fileIndex += 4;
 			sprites.push(blob.readS32BE(fileIndex)); fileIndex += 4;
 		}
-		//startGame(spriteCount, sprites);
 		
 		Scene.the.setSize(width * scaling, height * scaling);
 		Scene.the.clear();
@@ -159,11 +160,14 @@ class Main {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
 
-		if (mouseOnLeftBorder)
-			Scene.the.camx -= 1;
-		if (mouseOnRightBorder)
-			Scene.the.camx += 1;
-		Scene.the.camy = 0;
+		if (mousePosX < scrollArea)
+			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mousePosX) / scrollArea));
+		if (mousePosX > width - scrollArea)
+			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (width - mousePosX)) / scrollArea));
+		if (mousePosY < scrollArea)
+			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mousePosY) / scrollArea));
+		if (mousePosY > height - scrollArea)
+			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mousePosY)) / scrollArea));
 		Scene.the.update();
 	}
 
