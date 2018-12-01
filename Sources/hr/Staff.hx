@@ -7,7 +7,7 @@ class Staff
 {
 	public static function AddGuy()
 	{
-		var newGuy = new RandomGuy(Main.interactiveSprites, true);
+		var newGuy = new RandomGuy(Main.interactiveSprites);
 		
 		/*for (npcSpawn in Main.npcSpawns)
 		{

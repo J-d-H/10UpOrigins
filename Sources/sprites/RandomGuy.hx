@@ -11,38 +11,96 @@ import kha2d.Rectangle;
 import kha2d.Animation;
 import kha2d.Sprite;
 
+enum WorkerStatus
+{
+	WorkerSleeping;
+	WorkerPause;
+	WorkerWorking;
+	WorkerWorkingMotivated;
+	WorkerWorkingHard;
+}
+
 class RandomGuy extends InteractiveSprite {
-	
+
+
 	private var standLeft: Animation;
 	private var standRight: Animation;
 	private var walkLeft: Animation;
 	private var walkRight: Animation;
+	private var statusAnimations = new Array<Animation>();
 	public var lookLeft: Bool;
 	
 	private var stuff: Array<InteractiveSprite>;
 	
 	public var sleeping: Bool;
 	
-	private static var names = ["Augusto", "Ingo", "Christian", "Robert", "Björn", "Johannes", "Rebecca", "Stephen", "Alvar", "Michael", "Linh", "Roger", "Roman", "Max", "Paul", "Tobias", "Henno", "Niko", "Kai", "Julian"];
+	private static var names = ["Augusto", "Ingo", "Christian", "Robert", "Björn", "Johannes", "Rebecca", "Stephen", "Alvar", "Michael", "Linh", "Roger", "Roman", "Max", "Paul", "Tobias", "Henno", "Niko", "Kai", "Julian", "Rebecca", "Rebecca", "Rebecca", "Rebecca", "Rebecca"];
 	public static var allguys = new Array<RandomGuy>();
 	
 	private var zzzzz: Image;
 	private var zzzzzAnim: Animation;
 
+
+	private static inline var WORKER_SLEEPING = 0;
+	private static inline var WORKER_PAUSE = 1;
+	private static inline var WORKER_WORKING = 2;
+	private static inline var WORKER_WORKING_MOTIVATED = 3;
+	private static inline var WORKER_WORKING_HARD = 4;
+	private var status: Int;
+
+	public var Status(get, set): WorkerStatus;
+	private function intToStatus(value: Int):WorkerStatus {
+		return switch(value)
+		{
+			case WORKER_SLEEPING: WorkerStatus.WorkerSleeping;
+			case WORKER_PAUSE: WorkerStatus.WorkerPause;
+			case WORKER_WORKING: WorkerStatus.WorkerWorking;
+			case WORKER_WORKING_HARD: WorkerStatus.WorkerWorkingHard;
+			case WORKER_WORKING_MOTIVATED: WorkerStatus.WorkerWorkingMotivated;
+			default: throw "This is not happening.";
+		}
+	}
+	private function statusToInt(status: WorkerStatus):Int {
+		return switch(status)
+		{
+			case WorkerStatus.WorkerSleeping: WORKER_SLEEPING;
+			case WorkerStatus.WorkerPause: WORKER_PAUSE;
+			case WorkerStatus.WorkerWorking: WORKER_WORKING;
+			case WorkerStatus.WorkerWorkingHard: WORKER_WORKING_HARD;
+			case WorkerStatus.WorkerWorkingMotivated: WORKER_WORKING_MOTIVATED;
+		}
+	}
+	private function get_Status(): WorkerStatus { return intToStatus(status); }
+	
+	public function set_Status(value: WorkerStatus): WorkerStatus {
+		status = statusToInt(value);
+		
+		setAnimation(statusAnimations[status]);
+
+		sleeping = (status == WORKER_SLEEPING);
+
+		return value;
+	}
 	
 	public function new(stuff: Array<InteractiveSprite>, customlook: Bool = false) {
 		super(Assets.images.nullachtsechzehnmann, Std.int(720 / 9), Std.int(256 / 2));
 		collider = new Rectangle(-20, 0, width + 40, height);
 		isUseable = true;
 		zzzzz = Assets.images.zzzzz;
-		zzzzzAnim = Animation.createRange(0, 2, 8);
+		zzzzzAnim = Animation.createRange(0,2, 6);
 		standLeft = Animation.create(9);
 		standRight = Animation.create(0);
 		walkLeft = Animation.createRange(10, 17, 4);
 		walkRight = Animation.createRange(1, 8, 4);
+		statusAnimations[WORKER_SLEEPING] = Animation.create(14);
+		statusAnimations[WORKER_PAUSE] = standLeft;
+		statusAnimations[WORKER_WORKING] = new Animation([1, 2, 3, 3, 2, 1], 10);
+		statusAnimations[WORKER_WORKING_MOTIVATED] = new Animation([1, 2, 2], 6);
+		statusAnimations[WORKER_WORKING_HARD] = new Animation([1, 2, 3, 3, 2, 1, 10, 11, 12, 12, 11, 10], 4);
 		lookLeft = false;
 		sleeping = false;
-		setAnimation(standRight);
+
+		Status = intToStatus(Random.getUpTo(WORKER_WORKING_HARD));
 		
 		this.stuff = [];
 		if (stuff != null) {
@@ -53,23 +111,12 @@ class RandomGuy extends InteractiveSprite {
 			}*/
 		}
 		
-		trace("names.length=" + names.length);
-		trace(Random.getUpTo(5));
-		trace(Random.getUpTo(Std.int(names.length - 1)));
-		trace(Random.getUpTo(names.length - 1));
-		
 		var name = names[Random.getUpTo(names.length - 1)];
 		names.remove(name);
 		
 		if (!customlook) {
 			if (name == "Rebecca") {
 				image = Assets.images.nullachtsechzehnfrau;
-				w = 820 / 10;
-				h = 402 / 3;
-				standLeft = Animation.create(10);
-				standRight = Animation.create(0);
-				walkLeft = Animation.createRange(11, 18, 4);
-				walkRight = Animation.createRange(1, 8, 4);
 			}
 			else {
 				switch (Random.getUpTo(2)) {
@@ -120,12 +167,12 @@ class RandomGuy extends InteractiveSprite {
 			lookLeft = true;
 		}
 		else {
-			if (lookLeft) {
+			/*if (lookLeft) {
 				setAnimation(standLeft);
 			}
 			else {
 				setAnimation(standRight);
-			}
+			}*/
 		}
 		zzzzzAnim.next();
 	}
