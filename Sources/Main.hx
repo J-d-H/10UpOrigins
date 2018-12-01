@@ -7,7 +7,9 @@ import kha.System;
 
 import kha.Color;
 import kha.Image;
+import kha.Font;
 import kha.Scaler;
+import kha.math.FastMatrix3;
 import kha.input.Mouse;
 import kha2d.Scene;
 import kha2d.Tilemap;
@@ -25,10 +27,11 @@ class Main {
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
 	private static var backbuffer: Image;
-
-    static var lastTime = 0.0;
+	private static var font: Font;
+    private static var lastTime = 0.0;
 	private static var mousePosX: Int = Std.int(width / 2);
 	private static var mousePosY: Int = Std.int(height / 2);
+	private static var money: Int = 0;
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
 		
@@ -51,6 +54,7 @@ class Main {
 		if (Mouse.get() != null) Mouse.get().notify(onMouseDown, onMouseUp, onMouseMove, onMouseWheel);
 
 		lastTime = Scheduler.time();
+		font = Assets.fonts.LiberationSans_Regular;
 		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
 		initLevel();
 		Scene.the.camx = Std.int(width / 2);
@@ -170,10 +174,19 @@ class Main {
 		
 		Scene.the.render(g);
 		
-		//g.font = font;
-		//g.fontSize = fontSize;
-		//g.color = Color.White;
-		//g.fillRect(10, 10, 20, 20);
+		g.transformation = FastMatrix3.identity();
+
+		g.color = Color.White;
+		g.font = font;
+		g.fontSize = 24;
+		var s: String = "Money: " + Std.string(money);
+
+		var pad: Int = 5;
+		var spac: Int = 5;
+		g.color = Color.Black;
+		g.fillRect(width - (font.width(g.fontSize, s) + 2 * pad + spac), spac, font.width(g.fontSize, s) + 2 * pad, font.height(g.fontSize) + 2 * pad);
+		g.color = Color.White;
+		g.drawString(s, width - (font.width(g.fontSize, s) + pad + spac), pad + spac);
 		
 		g.end();
 		
