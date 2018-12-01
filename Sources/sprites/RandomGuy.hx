@@ -1,5 +1,7 @@
 package sprites;
 
+import manipulatables.ManipulatableSprite.OrderType;
+import js.html.rtc.PeerConnectionIceEventInit;
 import kha.Assets;
 import kha.Color;
 import kha.graphics2.Graphics;
@@ -10,9 +12,11 @@ import kha.math.Vector2;
 import kha2d.Rectangle;
 import kha2d.Animation;
 import kha2d.Sprite;
+import manipulatables.UseableSprite;
 
 enum WorkerStatus
 {
+	WorkerDead;
 	WorkerSleeping;
 	WorkerPause;
 	WorkerWorking;
@@ -20,8 +24,7 @@ enum WorkerStatus
 	WorkerWorkingHard;
 }
 
-class RandomGuy extends InteractiveSprite {
-
+class RandomGuy extends UseableSprite {
 
 	private var standLeft: Animation;
 	private var standRight: Animation;
@@ -41,17 +44,19 @@ class RandomGuy extends InteractiveSprite {
 	private var zzzzzAnim: Animation;
 
 
-	private static inline var WORKER_SLEEPING = 0;
-	private static inline var WORKER_PAUSE = 1;
-	private static inline var WORKER_WORKING = 2;
-	private static inline var WORKER_WORKING_MOTIVATED = 3;
-	private static inline var WORKER_WORKING_HARD = 4;
+	private static inline var WORKER_DEAD = 0;
+	private static inline var WORKER_SLEEPING = WORKER_DEAD + 1;
+	private static inline var WORKER_PAUSE = WORKER_SLEEPING + 1;
+	private static inline var WORKER_WORKING = WORKER_PAUSE + 1;
+	private static inline var WORKER_WORKING_MOTIVATED = WORKER_WORKING + 1;
+	private static inline var WORKER_WORKING_HARD = WORKER_WORKING_MOTIVATED + 1;
 	private var status: Int;
 
 	public var Status(get, set): WorkerStatus;
 	private function intToStatus(value: Int):WorkerStatus {
 		return switch(value)
 		{
+			case WORKER_DEAD: WorkerStatus.WorkerDead;
 			case WORKER_SLEEPING: WorkerStatus.WorkerSleeping;
 			case WORKER_PAUSE: WorkerStatus.WorkerPause;
 			case WORKER_WORKING: WorkerStatus.WorkerWorking;
@@ -63,6 +68,7 @@ class RandomGuy extends InteractiveSprite {
 	private function statusToInt(status: WorkerStatus):Int {
 		return switch(status)
 		{
+			case WorkerStatus.WorkerDead: WORKER_DEAD;
 			case WorkerStatus.WorkerSleeping: WORKER_SLEEPING;
 			case WorkerStatus.WorkerPause: WORKER_PAUSE;
 			case WorkerStatus.WorkerWorking: WORKER_WORKING;
@@ -77,21 +83,21 @@ class RandomGuy extends InteractiveSprite {
 		
 		setAnimation(statusAnimations[status]);
 
-		sleeping = (status == WORKER_SLEEPING);
+		sleeping = (status == WORKER_SLEEPING || status == WORKER_DEAD);
 
 		return value;
 	}
 	
 	public function new(stuff: Array<InteractiveSprite>, customlook: Bool = false) {
-		super(Assets.images.nullachtsechzehnmann, Std.int(720 / 9), Std.int(256 / 2));
+		super(names[Random.getUpTo(names.length - 1)], Assets.images.nullachtsechzehnmann, 0, 0, Std.int(720 / 9), Std.int(256 / 2));
 		collider = new Rectangle(-20, 0, width + 40, height);
-		isUseable = true;
 		zzzzz = Assets.images.zzzzz;
 		zzzzzAnim = Animation.createRange(0,2, 6);
 		standLeft = Animation.create(9);
 		standRight = Animation.create(0);
 		walkLeft = Animation.createRange(10, 17, 4);
 		walkRight = Animation.createRange(1, 8, 4);
+		statusAnimations[WORKER_DEAD] = Animation.create(6);
 		statusAnimations[WORKER_SLEEPING] = Animation.create(14);
 		statusAnimations[WORKER_PAUSE] = standLeft;
 		statusAnimations[WORKER_WORKING] = new Animation([1, 2, 3, 3, 2, 1], 10);
@@ -111,15 +117,14 @@ class RandomGuy extends InteractiveSprite {
 			}*/
 		}
 		
-		var name = names[Random.getUpTo(names.length - 1)];
-		names.remove(name);
-		
 		if (!customlook) {
-			if (name == "Rebecca") {
+			switch (name.substr(-1))
+			{
+			case "a" | "i" | "e":
 				image = Assets.images.nullachtsechzehnfrau;
-			}
-			else {
-				switch (Random.getUpTo(2)) {
+			default:
+				switch (Random.getUpTo(2))
+				{
 				case 0:
 					image = Assets.images.nullachtsechzehnmann_rot;
 				case 2:
@@ -131,33 +136,9 @@ class RandomGuy extends InteractiveSprite {
 		allguys.push(this);
 	}
 	
-	private function createMichaelTask(): Void {
-		var guy: RandomGuy = this;
-		var count = 0;
-		for (guy in allguys) {
-			if (guy.visible && guy != this) {
-				++count;
-			}
-		}
-		if (count > 0) {
-			while (guy == this || !guy.visible) {
-				var value = Random.getUpTo(RandomGuy.allguys.length - 1);
-				guy = RandomGuy.allguys[value];
-			}
-			//schedule.add(new MoveTask(this, guy));
-			//schedule.add(new BlaTask(this, guy));
-		}
-	}
-	
 	override public function update(): Void {
 		super.update();
-		if (isCurrentlyUsedFrom != null) {
-			speedx = 0;
-			speedy = 0;
-		}
-		else {
-			//schedule.update();
-		}
+
 		if (speedx > 0) {
 			setAnimation(walkRight);
 			lookLeft = false;
@@ -188,7 +169,10 @@ class RandomGuy extends InteractiveSprite {
 				if (angle != 0) g.pushTransformation(g.transformation.multmat(FastMatrix3.translation(x + originX, y + originY)).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-x - originX, -y - originY)));
 				g.drawScaledSubImage(image, Std.int(animation.get() * w) % image.width, Math.floor(animation.get() * w / image.width) * h, w, h, Math.round(x - collider.x * scaleX), Math.round(y - collider.y * scaleY), width, height);
 				if (angle != 0) g.popTransformation();
-				g.drawSubImage(zzzzz, x - 40, y - 20, zzzzz.width * zzzzzAnim.getIndex() / 3, 0, zzzzz.width / 3, zzzzz.height);
+				if (Status != WorkerDead)
+				{
+					g.drawSubImage(zzzzz, x - 40, y - 20, zzzzz.width * zzzzzAnim.getIndex() / 3, 0, zzzzz.width / 3, zzzzz.height);
+				}
 			}
 		}
 		else {
@@ -205,58 +189,41 @@ class RandomGuy extends InteractiveSprite {
 		}
 	}
 	
-	override public function isUsableFrom(user:Dynamic):Bool 
+	public override function getOrder(selectedItem : UseableSprite) : OrderType
 	{
-		return super.isUsableFrom(user) && Main.Player == user;
-	}
-	override public function useFrom(user:Dynamic):Bool 
-	{
-		#if false
-		if (super.useFrom(user))
+		if (isInInventory)
 		{
-			Empty.the.playerDlg.insert([
-				new Bla(Localization.getText(Keys_text.HELLO, [IdCard.Name + ', ${IdCard.Id}']), user, false)
-				, new Bla(Localization.getText(Keys_text.HELLO, [idUser.IdCard.Name]), this, false)
-				, new BlaWithChoices(Localization.getText(Keys_text.HOW_TO_HELP), this, [
-					[ /* Seltsames?*/ 
-						new Bla(Keys_text.STRANGE_NOTHING_ + Random.getUpTo(1), this, false)
-					]
-					, [ /* tun gerade? */
-						new Bla(schedule.nextTwoTaskDescription(), this, true)
-					]
-					, [ /* YOU ARE THE MONSTER */
-						new StartDialogue(everybodyRunToPlayer.bind(this))
-						, new StartDialogue(function() { 
-							Empty.the.showdown = true;
-							Empty.the.renderOverlay = true;
-							Empty.the.overlayColor = Color.fromBytes(0, 0, 0, 0);
-						})
-						, new Action(null, FADE_TO_BLACK)
-						, new Bla(Keys_text.YOUMONSTER_SHOWDOWN_1, user, true)
-						, new SpawnNpcDialog([new Action(null, ActionType.FADE_FROM_BLACK_TO_DUSK)])
-						, new Bla(Keys_text.YOUMONSTER_SHOWDOWN_1, user, false)
-						, new Bla(Keys_text.YOUMONSTER_SHOWDOWN_1, user, false)
-						, new Action(null, PAUSE)
-						, new Bla(Keys_text.YOUMONSTER_REACTION_ + Random.getUpTo(6), this, false)
-						, new StartDialogue(Dialogues.showdownChatter.bind(this))
-						, new Bla(Localization.getText(Keys_text.YOUMONSTER_SHOWDOWN_2, [this.IdCard.Name]), null, false)
-						, new Bla(Localization.getText(Keys_text.YOUMONSTER_SHOWDOWN_2, [this.IdCard.Name]), null, false)
-						, new Bla(Localization.getText(Keys_text.YOUMONSTER_SHOWDOWN_2, [this.IdCard.Name]), null, false)
-						, new BlaWithChoices(Keys_text.YOUMONSTER_SHOWDOWN_3, null, [
-							[new StartDialogue(Dialogues.showdownShoot.bind(this))]
-							, [new StartDialogue(Dialogues.showdownHesitate.bind(this))]
-						])
-					]
-				])
-				, new StartDialogue(stopUsing.bind(true))
-			]);
-			return true;
+			return OrderType.WontWork;
 		}
-		#end
-		return false;
+		else if (Status == WorkerDead)
+		{
+			return OrderType.WontWork;
+		}
+		else if (Std.is(selectedItem, manipulatables.Injection))
+		{
+			return OrderType.WorkHarder;
+		}
+		return OrderType.WontWork;
 	}
-	override public function stopUsing(clean:Bool):Void 
+
+	public override function executeOrder(order : OrderType) : Void
 	{
-		super.stopUsing(clean);
+		switch (order)
+		{
+		case WorkHarder:
+			switch (Status)
+			{
+			case WorkerDead:
+				throw "Findet nicht statt.";
+			case WorkerSleeping, WorkerPause:
+				Status = WorkerWorking;
+			case WorkerWorking, WorkerWorkingMotivated:
+				Status = WorkerWorkingHard;
+			case WorkerWorkingHard:
+				Status = WorkerWorkingHard;
+			}
+		default:
+			super.executeOrder(order);
+		}
 	}
 }

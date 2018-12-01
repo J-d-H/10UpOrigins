@@ -2,7 +2,7 @@ package;
 
 import kha.math.Random;
 import sprites.*;
-import hr.*;
+import hr.Staff;
 import kha.math.Vector2;
 import kha.Assets;
 import kha.Framebuffer;
@@ -27,15 +27,6 @@ class Main {
 	public static inline var tileHeight: Int = 32;
 	private static inline var scrollArea: Int = 32;
 	private static inline var scrollSpeed: Int = 5;
-	private static inline var maxEmployees: Int = 40;
-	private static inline var employeeStartingAge: Float = 0;
-	private static inline var employeeStartingTimeForCan: Float = 10;
-	private static inline var employeeStartingProgressTo10UpPerCan: Float = 0;
-	private static inline var agingSpeed: Float = 1 / 30;
-	private static inline var timeToPause: Float = 20;
-	private static inline var timeForPause: Float = 10;
-	private static inline var healthPerFullPause: Float = 0.2;
-	private static inline var healthChangeWhenWorking: Float = -(healthPerFullPause / timeToPause) * 0.5; // Lose one half Pause
 	private static var tilemap: Tilemap;
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
@@ -52,18 +43,9 @@ class Main {
 	private static var money: Int = 0;
 	private static var cansNormal: Int = 0;
 	private static var cans10up: Int = 0;
-	private static var employeeWorking: Array<Bool> = new Array<Bool>();
-	private static var employeeAge: Array<Float> = new Array<Float>();
-	private static var employeeTimeForCan: Array<Float> = new Array<Float>();
-	private static var employeeProgressTo10UpPerCan: Array<Float> = new Array<Float>();
-	private static var employeeProgressToCan: Array<Float> = new Array<Float>();
-	private static var employeeProgressTo10Up: Array<Float> = new Array<Float>();
-	private static var employeeTimeToNextPause: Array<Float> = new Array<Float>();
-	private static var employeeTimeForCurrentPause: Array<Float> = new Array<Float>();
-	private static var employeeHealth: Array<Float> = new Array<Float>();
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
-		Staff.AddGuy();
+		
 	}
 
 	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
@@ -73,6 +55,11 @@ class Main {
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
 		mousePosX = x;
 		mousePosY = y;
+		
+		var guysBelowPoint = Scene.the.getHeroesBelowPoint(x, y);
+		if (guysBelowPoint.length == 1) {
+			
+		}
 	}
 
 	private static function onMouseWheel(delta: Int): Void {
@@ -89,17 +76,9 @@ class Main {
 		initLevel();
 		Scene.the.camx = Std.int(width / 2);
 		
-		for (i in 0...maxEmployees)
+		for (i in 0...npcSpawns.length)
 		{
-			employeeWorking.push(true);
-			employeeAge.push(employeeStartingAge);
-			employeeTimeForCan.push(employeeStartingTimeForCan);
-			employeeProgressTo10UpPerCan.push(employeeStartingProgressTo10UpPerCan);
-			employeeProgressToCan.push(0);
-			employeeProgressTo10Up.push(0);
-			employeeTimeToNextPause.push(timeToPause);
-			employeeTimeForCurrentPause.push(0);
-			employeeHealth.push(1);
+			Staff.addGuy();
 		}
 	}
 	
@@ -194,79 +173,9 @@ class Main {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
 		
-		for (i in 0...maxEmployees)
-		{
-			// Employee aging and stats up-/ downgrades
-			employeeAge[i] += deltaTime * agingSpeed;
-			// (0, 10), (20, 3), (40, 10)
-			employeeTimeForCan[i] = 10 - 0.7 * employeeAge[i] + 0.0175 * employeeAge[i] * employeeAge[i];
-			// (0, 0), (20, 0.25), (40, 0)
-			employeeProgressTo10UpPerCan[i] = 0 + 0.025 * employeeAge[i] - 0.00625 * employeeAge[i] * employeeAge[i];
+		Staff.update(deltaTime);
 
-			// Pause progress
-			if (!employeeWorking[i])
-			{
-				employeeHealth[i] += (healthPerFullPause / timeForPause) * deltaTime;
-				// No overheal plz, we are not Wolfenstein
-				if (employeeHealth[i] > 1)
-					employeeHealth[i] = 1;
-
-				employeeTimeForCurrentPause[i] += deltaTime;
-				if (employeeTimeForCurrentPause[i] >= timeForPause)
-				{
-					employeeTimeForCurrentPause[i] -= timeForPause;
-					employeeWorking[i] = true;
-				}
-			}
-			// Employee progress
-			else if (employeeWorking[i])
-			{
-				employeeHealth[i] += healthChangeWhenWorking * deltaTime;
-				if (employeeHealth[i] <= 0)
-				{
-					// Hire new employe
-					employeeWorking[i] = true;
-					employeeAge[i] = employeeStartingAge;
-					employeeTimeForCan[i] = employeeStartingTimeForCan;
-					employeeProgressTo10UpPerCan[i] = employeeStartingProgressTo10UpPerCan;
-					employeeProgressToCan[i] = 0;
-					employeeProgressTo10Up[i] = 0;
-					employeeTimeToNextPause[i] = timeToPause;
-					employeeTimeForCurrentPause[i] = 0;
-					employeeHealth[i] = 1;
-				}
-				else
-				{
-					employeeProgressToCan[i] += deltaTime;
-					employeeTimeToNextPause[i] -= deltaTime;
-					// Needs pause
-					if (employeeTimeToNextPause[i] <= 0)
-					{
-						employeeTimeToNextPause[i] += timeToPause;
-						employeeWorking[i] = false;
-					}
-					// Can finished
-					else if (employeeProgressToCan[i] >= employeeTimeForCan[i])
-					{
-						if (employeeProgressTo10Up[i] >= 1)
-						{
-							// 10up can
-							employeeProgressTo10Up[i] -= 1;
-							++cans10up;
-						}
-						else
-						{
-							// Normal can
-							employeeProgressTo10Up[i] += employeeProgressTo10UpPerCan[i];
-							++cansNormal;
-						}
-						employeeProgressToCan[i] -= employeeTimeForCan[i];
-					}
-				}
-			}
-		}
-
-		if (mousePosX < scrollArea)
+		if (mousePosX  < scrollArea)
 			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mousePosX) / scrollArea));
 		if (mousePosX > width - scrollArea)
 			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (width - mousePosX)) / scrollArea));
@@ -322,13 +231,15 @@ class Main {
 		g.drawString(v2, width - (font.width(g.fontSize, v2) + pad + spac), yOffset);
 
 		// Debug only
-		g.drawString(Std.string(employeeAge[0]), 10, 10);
-		g.drawString(Std.string(employeeTimeForCan[0]), 10, 30);
-		g.drawString(Std.string(employeeProgressTo10UpPerCan[0]), 10, 50);
+		#if debug
+		g.drawString("Age: " + Std.string(Staff.employeeAge[0]), 10, 10);
+		g.drawString("TfC: " + Std.string(Staff.employeeTimeForCan[0]), 10, 30);
+		g.drawString("PpC: " + Std.string(Staff.employeeProgressTo10UpPerCan[0]), 10, 50);
 		
-		g.drawString(Std.string(employeeProgressToCan[0]), 10, 70);
-		g.drawString(Std.string(employeeProgressTo10Up[0]), 10, 90);
-		g.drawString(Std.string(employeeHealth[0]), 10, 110);
+		g.drawString("PtC: " + Std.string(Staff.employeeProgressToCan[0]), 10, 70);
+		g.drawString("P10: " + Std.string(Staff.employeeProgressTo10Up[0]), 10, 90);
+		g.drawString("Hth: " + Std.string(Staff.employeeHealth[0]), 10, 110);
+		#end
 
 		g.end();
 		
