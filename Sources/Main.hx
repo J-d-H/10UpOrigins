@@ -32,6 +32,10 @@ class Main {
 	private static inline var employeeStartingTimeForCan: Float = 10;
 	private static inline var employeeStartingProgressTo10UpPerCan: Float = 0;
 	private static inline var agingSpeed: Float = 1 / 30;
+	private static inline var timeToPause: Float = 20;
+	private static inline var timeForPause: Float = 10;
+	private static inline var healthPerFullPause: Float = 0.2;
+	private static inline var healthChangeWhenWorking: Float = -(healthPerFullPause / timeToPause) * 0.5; // Lose one half Pause
 	private static var tilemap: Tilemap;
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
@@ -54,6 +58,9 @@ class Main {
 	private static var employeeProgressTo10UpPerCan: Array<Float> = new Array<Float>();
 	private static var employeeProgressToCan: Array<Float> = new Array<Float>();
 	private static var employeeProgressTo10Up: Array<Float> = new Array<Float>();
+	private static var employeeTimeToNextPause: Array<Float> = new Array<Float>();
+	private static var employeeTimeForCurrentPause: Array<Float> = new Array<Float>();
+	private static var employeeHealth: Array<Float> = new Array<Float>();
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
 		Staff.AddGuy();
@@ -84,12 +91,15 @@ class Main {
 		
 		for (i in 0...maxEmployees)
 		{
-			employeeWorking.push(i == 0);
+			employeeWorking.push(true);
 			employeeAge.push(employeeStartingAge);
 			employeeTimeForCan.push(employeeStartingTimeForCan);
 			employeeProgressTo10UpPerCan.push(employeeStartingProgressTo10UpPerCan);
 			employeeProgressToCan.push(0);
 			employeeProgressTo10Up.push(0);
+			employeeTimeToNextPause.push(timeToPause);
+			employeeTimeForCurrentPause.push(0);
+			employeeHealth.push(1);
 		}
 	}
 	
@@ -193,27 +203,65 @@ class Main {
 			// (0, 0), (20, 0.25), (40, 0)
 			employeeProgressTo10UpPerCan[i] = 0 + 0.025 * employeeAge[i] - 0.00625 * employeeAge[i] * employeeAge[i];
 
-			// Employee progress
-			if (employeeWorking[i])
+			// Pause progress
+			if (!employeeWorking[i])
 			{
-				employeeProgressToCan[i] += deltaTime;
+				employeeHealth[i] += (healthPerFullPause / timeForPause) * deltaTime;
+				// No overheal plz, we are not Wolfenstein
+				if (employeeHealth[i] > 1)
+					employeeHealth[i] = 1;
 
-				// Can finished
-				if (employeeProgressToCan[i] >= employeeTimeForCan[i])
+				employeeTimeForCurrentPause[i] += deltaTime;
+				if (employeeTimeForCurrentPause[i] >= timeForPause)
 				{
-					if (employeeProgressTo10Up[i] >= 1)
+					employeeTimeForCurrentPause[i] -= timeForPause;
+					employeeWorking[i] = true;
+				}
+			}
+			// Employee progress
+			else if (employeeWorking[i])
+			{
+				employeeHealth[i] += healthChangeWhenWorking * deltaTime;
+				if (employeeHealth[i] <= 0)
+				{
+					// Hire new employe
+					employeeWorking[i] = true;
+					employeeAge[i] = employeeStartingAge;
+					employeeTimeForCan[i] = employeeStartingTimeForCan;
+					employeeProgressTo10UpPerCan[i] = employeeStartingProgressTo10UpPerCan;
+					employeeProgressToCan[i] = 0;
+					employeeProgressTo10Up[i] = 0;
+					employeeTimeToNextPause[i] = timeToPause;
+					employeeTimeForCurrentPause[i] = 0;
+					employeeHealth[i] = 1;
+				}
+				else
+				{
+					employeeProgressToCan[i] += deltaTime;
+					employeeTimeToNextPause[i] -= deltaTime;
+					// Needs pause
+					if (employeeTimeToNextPause[i] <= 0)
 					{
-						// 10up can
-						employeeProgressTo10Up[i] -= 1;
-						++cans10up;
+						employeeTimeToNextPause[i] += timeToPause;
+						employeeWorking[i] = false;
 					}
-					else
+					// Can finished
+					else if (employeeProgressToCan[i] >= employeeTimeForCan[i])
 					{
-						// Normal can
-						employeeProgressTo10Up[i] += employeeProgressTo10UpPerCan[i];
-						++cansNormal;
+						if (employeeProgressTo10Up[i] >= 1)
+						{
+							// 10up can
+							employeeProgressTo10Up[i] -= 1;
+							++cans10up;
+						}
+						else
+						{
+							// Normal can
+							employeeProgressTo10Up[i] += employeeProgressTo10UpPerCan[i];
+							++cansNormal;
+						}
+						employeeProgressToCan[i] -= employeeTimeForCan[i];
 					}
-					employeeProgressToCan[i] -= employeeTimeForCan[i];
 				}
 			}
 		}
@@ -280,6 +328,7 @@ class Main {
 		
 		g.drawString(Std.string(employeeProgressToCan[0]), 10, 70);
 		g.drawString(Std.string(employeeProgressTo10Up[0]), 10, 90);
+		g.drawString(Std.string(employeeHealth[0]), 10, 110);
 
 		g.end();
 		
