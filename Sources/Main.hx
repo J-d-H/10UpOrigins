@@ -61,7 +61,7 @@ class Main {
 		for (i in 0...1024) {
 			tileColissions.push(new Tile(i, isCollidable(i)));
 		}
-		var blob = Assets.blobs.testlevel_map;
+		var blob = Assets.blobs.factory_map;
 		var fileIndex = 0;
 		var levelWidth: Int = blob.readS32BE(fileIndex); fileIndex += 4;
 		var levelHeight: Int = blob.readS32BE(fileIndex); fileIndex += 4;
