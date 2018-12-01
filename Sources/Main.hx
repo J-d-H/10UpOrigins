@@ -1,5 +1,9 @@
 package;
 
+import kha.math.Random;
+import sprites.*;
+import hr.*;
+import kha.math.Vector2;
 import kha.Assets;
 import kha.Framebuffer;
 import kha.Scheduler;
@@ -25,13 +29,17 @@ class Main {
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
 	private static var backbuffer: Image;
+	
+	public static var Player(default, null) = "Boss";
+	public static var npcSpawns : Array<Vector2> = new Array<Vector2>();
+	public static var interactiveSprites: Array<InteractiveSprite>;
 
     static var lastTime = 0.0;
 	private static var mousePosX: Int = Std.int(width / 2);
 	private static var mousePosY: Int = Std.int(height / 2);
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
-		
+		Staff.AddGuy();
 	}
 
 	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
@@ -50,6 +58,7 @@ class Main {
 	private static function init(): Void {
 		if (Mouse.get() != null) Mouse.get().notify(onMouseDown, onMouseUp, onMouseMove, onMouseWheel);
 
+		Random.init(Std.int(System.time * 100));
 		lastTime = Scheduler.time();
 		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
 		initLevel();
@@ -87,7 +96,7 @@ class Main {
 		Scene.the.setColissionMap(tilemap);
 		Scene.the.addBackgroundTilemap(tilemap, 1);
 		
-		/*var computers : Array<Vector2> = new Array<Vector2>();
+		var computers : Array<Vector2> = new Array<Vector2>();
 		var bookshelves : Array<Vector2> = new Array<Vector2>();
 		var elevatorPositions : Array<Vector2> = new Array<Vector2>();
 		npcSpawns = new Array<Vector2>();
@@ -96,9 +105,9 @@ class Main {
 			var sprite : kha2d.Sprite = null;
 			switch (sprites[i * 3]) {
 			case 0:
-				agentSpawn = new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]);
+				//agentSpawn = new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]);
 			case 1:
-				computers.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
+				//computers.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
 			case 2:
 				elevatorPositions.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
 			case 3:
@@ -110,7 +119,7 @@ class Main {
 			case 5:
 				npcSpawns.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
 			case 6:
-				npcSpawns.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
+				//npcSpawns.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
 				var coffee : Coffee = new Coffee(sprites[i * 3 + 1], sprites[i * 3 + 2]);
 				Scene.the.addOther(coffee);
 				interactiveSprites.push(coffee);
@@ -118,7 +127,7 @@ class Main {
 				var wooddoor : Wooddoor = new Wooddoor(sprites[i * 3 + 1], sprites[i * 3 + 2]);
 				Scene.the.addOther(wooddoor);
 			}
-		}*/
+		}
 	}
 	
 	private static function isCollidable(tilenumber: Int): Bool {
