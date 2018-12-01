@@ -151,10 +151,16 @@ class Main {
 			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mousePosX) / scrollArea));
 		if (mousePosX > width - scrollArea)
 			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (width - mousePosX)) / scrollArea));
+		Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
+		Scene.the.camx = Std.int(Math.min(Scene.the.camx, map.length * tileWidth - Std.int(width / 2)));
+
 		if (mousePosY < scrollArea)
 			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mousePosY) / scrollArea));
 		if (mousePosY > height - scrollArea)
 			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mousePosY)) / scrollArea));
+		Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
+		Scene.the.camy = Std.int(Math.min(Scene.the.camy, map[0].length * tileHeight - Std.int(height / 2)));
+
 		Scene.the.update();
 	}
 
