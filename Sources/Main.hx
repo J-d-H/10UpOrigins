@@ -27,6 +27,11 @@ class Main {
 	public static inline var tileHeight: Int = 32;
 	private static inline var scrollArea: Int = 32;
 	private static inline var scrollSpeed: Int = 5;
+	private static inline var maxEmployees: Int = 40;
+	private static inline var employeeStartingAge: Float = 0;
+	private static inline var employeeStartingTimeForCan: Float = 10;
+	private static inline var employeeStartingProgressTo10UpPerCan: Float = 0;
+	private static inline var agingSpeed: Float = 1 / 30;
 	private static var tilemap: Tilemap;
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
@@ -41,6 +46,14 @@ class Main {
 	private static var mousePosX: Int = Std.int(width / 2);
 	private static var mousePosY: Int = Std.int(height / 2);
 	private static var money: Int = 0;
+	private static var cansNormal: Int = 0;
+	private static var cans10up: Int = 0;
+	private static var employeeWorking: Array<Bool> = new Array<Bool>();
+	private static var employeeAge: Array<Float> = new Array<Float>();
+	private static var employeeTimeForCan: Array<Float> = new Array<Float>();
+	private static var employeeProgressTo10UpPerCan: Array<Float> = new Array<Float>();
+	private static var employeeProgressToCan: Array<Float> = new Array<Float>();
+	private static var employeeProgressTo10Up: Array<Float> = new Array<Float>();
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
 		Staff.AddGuy();
@@ -68,6 +81,16 @@ class Main {
 		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
 		initLevel();
 		Scene.the.camx = Std.int(width / 2);
+		
+		for (i in 0...maxEmployees)
+		{
+			employeeWorking.push(i == 0);
+			employeeAge.push(employeeStartingAge);
+			employeeTimeForCan.push(employeeStartingTimeForCan);
+			employeeProgressTo10UpPerCan.push(employeeStartingProgressTo10UpPerCan);
+			employeeProgressToCan.push(0);
+			employeeProgressTo10Up.push(0);
+		}
 	}
 	
 	public static function initLevel(): Void {
@@ -160,6 +183,40 @@ class Main {
 	static function update(): Void {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
+		
+		for (i in 0...maxEmployees)
+		{
+			// Employee aging and stats up-/ downgrades
+			employeeAge[i] += deltaTime * agingSpeed;
+			// (0, 10), (20, 3), (40, 10)
+			employeeTimeForCan[i] = 10 - 0.7 * employeeAge[i] + 0.0175 * employeeAge[i] * employeeAge[i];
+			// (0, 0), (20, 0.25), (40, 0)
+			employeeProgressTo10UpPerCan[i] = 0 + 0.025 * employeeAge[i] - 0.00625 * employeeAge[i] * employeeAge[i];
+
+			// Employee progress
+			if (employeeWorking[i])
+			{
+				employeeProgressToCan[i] += deltaTime;
+
+				// Can finished
+				if (employeeProgressToCan[i] >= employeeTimeForCan[i])
+				{
+					if (employeeProgressTo10Up[i] >= 1)
+					{
+						// 10up can
+						employeeProgressTo10Up[i] -= 1;
+						++cans10up;
+					}
+					else
+					{
+						// Normal can
+						employeeProgressTo10Up[i] += employeeProgressTo10UpPerCan[i];
+						++cansNormal;
+					}
+					employeeProgressToCan[i] -= employeeTimeForCan[i];
+				}
+			}
+		}
 
 		if (mousePosX < scrollArea)
 			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mousePosX) / scrollArea));
@@ -189,15 +246,41 @@ class Main {
 		g.color = Color.White;
 		g.font = font;
 		g.fontSize = 24;
-		var s: String = "Money: " + Std.string(money);
+		var k0: String = "Money: ";
+		var k1: String = "Cans: ";
+		var k2: String = "10ups: ";
+		var v0: String = Std.string(money);
+		var v1: String = Std.string(cansNormal);
+		var v2: String = Std.string(cans10up);
+		var s0: String = k0 + v0;
+		var s1: String = k1 + v1;
+		var s2: String = k2 + v2;
+		var stringWidth: Float = Math.max(Math.max(font.width(g.fontSize, s0), font.width(g.fontSize, s1)), font.width(g.fontSize, s2));
+		var stringHeight: Float = font.height(g.fontSize);
 
 		var pad: Int = 5;
 		var spac: Int = 5;
 		g.color = Color.Black;
-		g.fillRect(width - (font.width(g.fontSize, s) + 2 * pad + spac), spac, font.width(g.fontSize, s) + 2 * pad, font.height(g.fontSize) + 2 * pad);
+		g.fillRect(width - (stringWidth + 2 * pad + spac), spac, stringWidth + 2 * pad, stringHeight * 3 + pad * 4);
 		g.color = Color.White;
-		g.drawString(s, width - (font.width(g.fontSize, s) + pad + spac), pad + spac);
+		var yOffset: Float = pad + spac;
+		g.drawString(k0, width - (stringWidth + pad + spac), yOffset);
+		g.drawString(v0, width - (font.width(g.fontSize, v0) + pad + spac), yOffset);
+		yOffset += pad + stringHeight;
+		g.drawString(k1, width - (stringWidth + pad + spac), yOffset);
+		g.drawString(v1, width - (font.width(g.fontSize, v1) + pad + spac), yOffset);
+		yOffset += pad + stringHeight;
+		g.drawString(k2, width - (stringWidth + pad + spac), yOffset);
+		g.drawString(v2, width - (font.width(g.fontSize, v2) + pad + spac), yOffset);
+
+		// Debug only
+		g.drawString(Std.string(employeeAge[0]), 10, 10);
+		g.drawString(Std.string(employeeTimeForCan[0]), 10, 30);
+		g.drawString(Std.string(employeeProgressTo10UpPerCan[0]), 10, 50);
 		
+		g.drawString(Std.string(employeeProgressToCan[0]), 10, 70);
+		g.drawString(Std.string(employeeProgressTo10Up[0]), 10, 90);
+
 		g.end();
 		
 		framebuffer.g2.begin();
