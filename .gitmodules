@@ -1,0 +1,6 @@
+[submodule "Kha"]
+	path = Kha
+	url = https://github.com/Kode/Kha
+[submodule "Libraries/Kha2D"]
+	path = Libraries/Kha2D
+	url = https://github.com/Kha-Samples/Kha2D
