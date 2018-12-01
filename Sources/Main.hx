@@ -24,7 +24,6 @@ class Main {
 	private static var tilemap: Tilemap;
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
-	private static var originalmap: Array<Array<Int>>;
 	private static var backbuffer: Image;
 
     static var lastTime = 0.0;
@@ -66,18 +65,11 @@ class Main {
 		var fileIndex = 0;
 		var levelWidth: Int = blob.readS32BE(fileIndex); fileIndex += 4;
 		var levelHeight: Int = blob.readS32BE(fileIndex); fileIndex += 4;
-		originalmap = new Array<Array<Int>>();
-		for (x in 0...levelWidth) {
-			originalmap.push(new Array<Int>());
-			for (y in 0...levelHeight) {
-				originalmap[x].push(blob.readS32BE(fileIndex)); fileIndex += 4;
-			}
-		}
 		map = new Array<Array<Int>>();
-		for (x in 0...originalmap.length) {
+		for (x in 0...levelWidth) {
 			map.push(new Array<Int>());
-			for (y in 0...originalmap[0].length) {
-				map[x].push(0);
+			for (y in 0...levelHeight) {
+				map[x].push(blob.readS32BE(fileIndex)); fileIndex += 4;
 			}
 		}
 		var spriteCount = blob.readS32BE(fileIndex); fileIndex += 4;
@@ -94,11 +86,6 @@ class Main {
 		var tilemap = new Tilemap(Assets.images.tileset, tileWidth, tileHeight, map, tileColissions);
 		Scene.the.setColissionMap(tilemap);
 		Scene.the.addBackgroundTilemap(tilemap, 1);
-		for (x in 0...originalmap.length) {
-			for (y in 0...originalmap[0].length) {
-				map[x][y] = originalmap[x][y];
-			}
-		}
 		
 		/*var computers : Array<Vector2> = new Array<Vector2>();
 		var bookshelves : Array<Vector2> = new Array<Vector2>();
