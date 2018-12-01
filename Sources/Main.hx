@@ -11,7 +11,9 @@ import kha.System;
 
 import kha.Color;
 import kha.Image;
+import kha.Font;
 import kha.Scaler;
+import kha.math.FastMatrix3;
 import kha.input.Mouse;
 import kha2d.Scene;
 import kha2d.Tilemap;
@@ -29,14 +31,16 @@ class Main {
 	private static var tileColissions: Array<Tile>;
 	private static var map: Array<Array<Int>>;
 	private static var backbuffer: Image;
+	private static var font: Font;
+    private static var lastTime = 0.0;
 	
 	public static var Player(default, null) = "Boss";
 	public static var npcSpawns : Array<Vector2> = new Array<Vector2>();
 	public static var interactiveSprites: Array<InteractiveSprite>;
 
-    static var lastTime = 0.0;
 	private static var mousePosX: Int = Std.int(width / 2);
 	private static var mousePosY: Int = Std.int(height / 2);
+	private static var money: Int = 0;
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
 		Staff.AddGuy();
@@ -60,6 +64,7 @@ class Main {
 
 		Random.init(Std.int(System.time * 100));
 		lastTime = Scheduler.time();
+		font = Assets.fonts.LiberationSans_Regular;
 		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
 		initLevel();
 		Scene.the.camx = Std.int(width / 2);
@@ -70,7 +75,7 @@ class Main {
 		for (i in 0...1024) {
 			tileColissions.push(new Tile(i, isCollidable(i)));
 		}
-		var blob = Assets.blobs.testlevel_map;
+		var blob = Assets.blobs.factory_map;
 		var fileIndex = 0;
 		var levelWidth: Int = blob.readS32BE(fileIndex); fileIndex += 4;
 		var levelHeight: Int = blob.readS32BE(fileIndex); fileIndex += 4;
@@ -160,10 +165,16 @@ class Main {
 			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mousePosX) / scrollArea));
 		if (mousePosX > width - scrollArea)
 			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (width - mousePosX)) / scrollArea));
+		Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
+		Scene.the.camx = Std.int(Math.min(Scene.the.camx, map.length * tileWidth - Std.int(width / 2)));
+
 		if (mousePosY < scrollArea)
 			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mousePosY) / scrollArea));
 		if (mousePosY > height - scrollArea)
 			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mousePosY)) / scrollArea));
+		Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
+		Scene.the.camy = Std.int(Math.min(Scene.the.camy, map[0].length * tileHeight - Std.int(height / 2)));
+
 		Scene.the.update();
 	}
 
@@ -173,10 +184,19 @@ class Main {
 		
 		Scene.the.render(g);
 		
-		//g.font = font;
-		//g.fontSize = fontSize;
-		//g.color = Color.White;
-		//g.fillRect(10, 10, 20, 20);
+		g.transformation = FastMatrix3.identity();
+
+		g.color = Color.White;
+		g.font = font;
+		g.fontSize = 24;
+		var s: String = "Money: " + Std.string(money);
+
+		var pad: Int = 5;
+		var spac: Int = 5;
+		g.color = Color.Black;
+		g.fillRect(width - (font.width(g.fontSize, s) + 2 * pad + spac), spac, font.width(g.fontSize, s) + 2 * pad, font.height(g.fontSize) + 2 * pad);
+		g.color = Color.White;
+		g.drawString(s, width - (font.width(g.fontSize, s) + pad + spac), pad + spac);
 		
 		g.end();
 		

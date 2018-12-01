@@ -4,5 +4,6 @@ project.addSources('Sources');
 project.addLibrary('Kha2D');
 project.addAssets('Assets/data/*');
 project.addAssets('Assets/sprites/*');
+project.addAssets('Assets/fonts/*');
 
 resolve(project);
