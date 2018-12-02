@@ -27,8 +27,6 @@ class Staff
 
 		Scene.the.addHero(newGuy);
 		
-		newGuy.Status = WorkerWorking;
-		
 		return newGuy;
 	}
 

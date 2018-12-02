@@ -141,7 +141,7 @@ class RandomGuy extends UseableSprite {
 		employeeCansNot = 0;
 		employeeCans10up = 0;
 
-		Status = intToStatus(Random.getUpTo(WORKER_WORKING_HARD));
+		Status = WorkerWorkingMotivated;
 		
 		this.stuff = [];
 		if (stuff != null) {
