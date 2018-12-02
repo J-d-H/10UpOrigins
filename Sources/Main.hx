@@ -19,6 +19,8 @@ import kha2d.Scene;
 import kha2d.Tilemap;
 import kha2d.Tile;
 
+typedef StringPair = { key : String, value : String }
+
 class Main {
 	public static inline var width: Int = 1024;
 	public static inline var height: Int = 768;
@@ -209,21 +211,19 @@ class Main {
 		Scene.the.render(g);
 		
 		g.transformation = FastMatrix3.identity();
+		
+		var hudDisplays : Array<StringPair> = [
+			{ key: "Money: ", value: Std.string(money) },
+			{ key: "Cans: ", value: Std.string(cansNormal) },
+			{ key: "10ups: ", value: Std.string(cans10up) }
+		];
 
-		g.color = Color.White;
 		g.font = font;
 		g.fontSize = 24;
-		var k0: String = "Money: ";
-		var k1: String = "Cans: ";
-		var k2: String = "10ups: ";
-		var v0: String = Std.string(money);
-		var v1: String = Std.string(cansNormal);
-		var v2: String = Std.string(cans10up);
-		var s0: String = k0 + v0;
-		var s1: String = k1 + v1;
-		var s2: String = k2 + v2;
-		var stringWidth: Float = Math.max(Math.max(font.width(g.fontSize, s0), font.width(g.fontSize, s1)), font.width(g.fontSize, s2));
-		var stringHeight: Float = font.height(g.fontSize);
+		var stringWidth: Float = 0;
+		for (i in 0...hudDisplays.length)
+			stringWidth = Math.max(g.font.width(g.fontSize, hudDisplays[i].key + hudDisplays[i].value), stringWidth);
+		var stringHeight: Float = g.font.height(g.fontSize);
 
 		var pad: Int = 5;
 		var spac: Int = 5;
@@ -231,14 +231,12 @@ class Main {
 		g.fillRect(width - (stringWidth + 2 * pad + spac), spac, stringWidth + 2 * pad, stringHeight * 3 + pad * 4);
 		g.color = Color.White;
 		var yOffset: Float = pad + spac;
-		g.drawString(k0, width - (stringWidth + pad + spac), yOffset);
-		g.drawString(v0, width - (font.width(g.fontSize, v0) + pad + spac), yOffset);
-		yOffset += pad + stringHeight;
-		g.drawString(k1, width - (stringWidth + pad + spac), yOffset);
-		g.drawString(v1, width - (font.width(g.fontSize, v1) + pad + spac), yOffset);
-		yOffset += pad + stringHeight;
-		g.drawString(k2, width - (stringWidth + pad + spac), yOffset);
-		g.drawString(v2, width - (font.width(g.fontSize, v2) + pad + spac), yOffset);
+		for (i in 0...hudDisplays.length)
+		{
+			g.drawString(hudDisplays[i].key, width - (stringWidth + pad + spac), yOffset);
+			g.drawString(hudDisplays[i].value, width - (g.font.width(g.fontSize, hudDisplays[i].value) + pad + spac), yOffset);
+			yOffset += pad + stringHeight;
+		}
 
 		// Debug only
 		#if debug
