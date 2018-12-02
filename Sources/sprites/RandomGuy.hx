@@ -31,6 +31,8 @@ class RandomGuy extends UseableSprite {
 	private var walkRight: Animation;
 	private var statusAnimations = new Map<WorkerStatus, Animation>();
 	public var lookLeft: Bool;
+
+	private var renderColor: Color;
 	
 	public var sleeping: Bool;
 	
@@ -79,6 +81,7 @@ class RandomGuy extends UseableSprite {
 	public function new(customlook: Bool = false) {
 		super(names[Random.getUpTo(names.length - 1)], Assets.images.nullachtsechzehnmann, 0, 0, Std.int(720 / 9), Std.int(256 / 2));
 		collider = new Rectangle(0, 0, width, height -20);
+		renderColor = Color.White;
 		zzzzz = Assets.images.zzzzz;
 		zzzzzAnim = Animation.createRange(0,2, 6);
 		standLeft = Animation.create(9);
@@ -115,6 +118,13 @@ class RandomGuy extends UseableSprite {
 			{
 			case "a" | "i" | "e":
 				image = Assets.images.nullachtsechzehnfrau;
+				switch (Random.getUpTo(2))
+				{
+				case 0:
+					renderColor = Color.Orange;
+				case 2:
+					renderColor = Color.fromBytes(150, 100, 50);
+				}
 			default:
 				switch (Random.getUpTo(2))
 				{
@@ -150,24 +160,26 @@ class RandomGuy extends UseableSprite {
 	}
 	
 	override public function render(g: Graphics): Void {
+		if (image == null || !visible) return;
 		if (sleeping) {
-			if (image != null && visible) {
-				g.color = Color.White;
-				var angle = Math.PI / 2;
-				var x = this.x + 100;
-				var y = this.y + 60;
-				lookLeft = true;
-				if (angle != 0) g.pushTransformation(g.transformation.multmat(FastMatrix3.translation(x + originX, y + originY)).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-x - originX, -y - originY)));
-				g.drawScaledSubImage(image, Std.int(animation.get() * w) % image.width, Math.floor(animation.get() * w / image.width) * h, w, h, Math.round(x - collider.x * scaleX), Math.round(y - collider.y * scaleY), width, height);
-				if (angle != 0) g.popTransformation();
-				if (status != WorkerDead)
-				{
-					g.drawSubImage(zzzzz, x - 40, y - 20, zzzzz.width * zzzzzAnim.getIndex() / 3, 0, zzzzz.width / 3, zzzzz.height);
-				}
+			g.color = Color.White;
+			var angle = Math.PI / 2;
+			var x = this.x + 100;
+			var y = this.y + 60;
+			lookLeft = true;
+			if (angle != 0) g.pushTransformation(g.transformation.multmat(FastMatrix3.translation(x + originX, y + originY)).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-x - originX, -y - originY)));
+			g.drawScaledSubImage(image, Std.int(animation.get() * w) % image.width, Math.floor(animation.get() * w / image.width) * h, w, h, Math.round(x - collider.x * scaleX), Math.round(y - collider.y * scaleY), width, height);
+			if (angle != 0) g.popTransformation();
+			if (status != WorkerDead)
+			{
+				g.drawSubImage(zzzzz, x - 40, y - 20, zzzzz.width * zzzzzAnim.getIndex() / 3, 0, zzzzz.width / 3, zzzzz.height);
 			}
 		}
 		else {
-			super.render(g);
+			g.color = renderColor;
+			if (angle != 0) g.pushTransformation(g.transformation.multmat(FastMatrix3.translation(x + originX, y + originY)).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-x - originX, -y - originY)));
+			g.drawScaledSubImage(image, Std.int(animation.get() * w) % image.width, Math.floor(animation.get() * w / image.width) * h, w, h, Math.round(x - collider.x * scaleX), Math.round(y - collider.y * scaleY), width, height);
+			if (angle != 0) g.popTransformation();
 			#if debug
 			g.color = Color.fromBytes(255, 0, 0);
 			g.drawRect(x - collider.x * scaleX, y - collider.y * scaleY, width, height);
