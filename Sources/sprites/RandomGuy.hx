@@ -38,11 +38,27 @@ class RandomGuy extends UseableSprite {
 	public var sleeping: Bool;
 	
 	private static var names = ["Augusto", "Ingo", "Christian", "Robert", "Björn", "Johannes", "Rebecca", "Stephen", "Alvar", "Michael", "Linh", "Roger", "Roman", "Max", "Paul", "Tobias", "Henno", "Niko", "Kai", "Julian", "Rebecca", "Rebecca", "Rebecca", "Rebecca", "Rebecca"];
-	public static var allguys = new Array<RandomGuy>();
 	
 	private var zzzzz: Image;
 	private var zzzzzAnim: Animation;
-
+	
+	private static inline var employeeStartingAge: Float = 0;
+	private static inline var employeeStartingTimeForCan: Float = 10;
+	private static inline var employeeStartingProgressTo10UpPerCan: Float = 0;
+	private static inline var agingSpeed: Float = 1 / 30;
+	private static inline var timeToPause: Float = 20;
+	private static inline var timeForPause: Float = 10;
+	private static inline var healthPerFullPause: Float = 0.2;
+	private static inline var healthChangeWhenWorking: Float = -(healthPerFullPause / timeToPause) * 0.5; // Lose one half Pause
+	
+	public var employeeAge: Float;
+	public var employeeTimeForCan: Float;
+	public var employeeProgressTo10UpPerCan: Float;
+	public var employeeProgressToCan: Float;
+	public var employeeProgressTo10Up: Float;
+	public var employeeTimeToNextPause: Float;
+	public var employeeTimeForCurrentPause: Float;
+	public var employeeHealth: Float;
 
 	private static inline var WORKER_DEAD = 0;
 	private static inline var WORKER_SLEEPING = WORKER_DEAD + 1;
@@ -105,6 +121,15 @@ class RandomGuy extends UseableSprite {
 		statusAnimations[WORKER_WORKING_HARD] = new Animation([1, 2, 3, 3, 2, 1, 10, 11, 12, 12, 11, 10], 4);
 		lookLeft = false;
 		sleeping = false;
+		
+		employeeAge = employeeStartingAge;
+		employeeTimeForCan = employeeStartingTimeForCan;
+		employeeProgressTo10UpPerCan = employeeStartingProgressTo10UpPerCan;
+		employeeProgressToCan = 0;
+		employeeProgressTo10Up = 0;
+		employeeTimeToNextPause = timeToPause;
+		employeeTimeForCurrentPause = 0;
+		employeeHealth = 1;
 
 		Status = intToStatus(Random.getUpTo(WORKER_WORKING_HARD));
 		
@@ -132,8 +157,6 @@ class RandomGuy extends UseableSprite {
 				}
 			}
 		}
-		
-		allguys.push(this);
 	}
 	
 	override public function update(): Void {
@@ -225,5 +248,77 @@ class RandomGuy extends UseableSprite {
 		default:
 			super.executeOrder(order);
 		}
+	}
+
+	public function updateState(deltaTime: Float): WorkerStatus
+	{
+		// Employee aging and stats up-/ downgrades
+		employeeAge += deltaTime * agingSpeed;
+		// (0, 10), (20, 3), (40, 10)
+		employeeTimeForCan = 10 - 0.7 * employeeAge + 0.0175 * employeeAge * employeeAge;
+		// (0, 0), (20, 0.25), (40, 0)
+		employeeProgressTo10UpPerCan = 0 + 0.025 * employeeAge - 0.000625 * employeeAge * employeeAge;
+
+		// Pause progress
+		switch (Status)
+		{
+			case WorkerDead:
+			{
+				// ...
+			}
+			case WorkerSleeping | WorkerPause:
+			{
+				employeeHealth += (healthPerFullPause / timeForPause) * deltaTime;
+				// No overheal plz, we are not Wolfenstein
+				if (employeeHealth > 1)
+					employeeHealth = 1;
+
+				employeeTimeForCurrentPause += deltaTime;
+				if (employeeTimeForCurrentPause >= timeForPause)
+				{
+					employeeTimeForCurrentPause -= timeForPause;
+					Status = employeeHealth > 0.99 ? WorkerWorkingMotivated : WorkerWorking;
+				}
+			}
+			case WorkerWorking | WorkerWorkingMotivated | WorkerWorkingHard:
+			{
+				employeeHealth += healthChangeWhenWorking * deltaTime;
+				if (employeeHealth <= 0)
+				{
+					Status = WorkerDead;
+					++FactoryState.the.casualties;
+				}
+				else
+				{
+					employeeProgressToCan += deltaTime;
+					employeeTimeToNextPause -= deltaTime;
+					// Needs pause
+					if (employeeTimeToNextPause <= 0)
+					{
+						employeeTimeToNextPause += timeToPause;
+						Status = WorkerPause;
+					}
+					// Can finished
+					else if (employeeProgressToCan >= employeeTimeForCan)
+					{
+						if (employeeProgressTo10Up >= 1)
+						{
+							// 10up can
+							employeeProgressTo10Up -= 1;
+							++FactoryState.the.cans10up;
+						}
+						else
+						{
+							// Normal can
+							employeeProgressTo10Up += employeeProgressTo10UpPerCan;
+							++FactoryState.the.cansNormal;
+						}
+						employeeProgressToCan -= employeeTimeForCan;
+					}
+				}
+			}
+		}
+
+		return Status;
 	}
 }

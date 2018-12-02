@@ -39,18 +39,13 @@ class Main {
 	public static var Player(default, null) = "Boss";
 	public static var npcSpawns : Array<Vector2> = new Array<Vector2>();
 	public static var interactiveSprites: Array<InteractiveSprite>;
+	private static var guyBelowMouse: RandomGuy = null;
 
 	private static var mousePosX: Int = Std.int(width / 2);
 	private static var mousePosY: Int = Std.int(height / 2);
-	private static var money: Int = 0;
-	private static var cansNormal: Int = 0;
-	private static var cans10up: Int = 0;
 
-	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
-		
-	}
-
-	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
+	private static function getGuyBelowCoords(x: Int, y: Int): RandomGuy
+	{
 		var worldX = x + Scene.the.screenOffsetX;
 		var worldY = y + Scene.the.screenOffsetY;
 		var guysBelowPoint = Scene.the.getHeroesBelowPoint(x, y);
@@ -59,19 +54,27 @@ class Main {
 			if (Std.is(guy, RandomGuy))
 			{
 				var randomGuy : RandomGuy = cast guy;
-				randomGuy.executeOrder(WorkHarder);
+				return randomGuy;
 			}
+		}
+		return null;
+	}
+
+	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
+		
+	}
+
+	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
+		var randomGuy: RandomGuy = getGuyBelowCoords(x, y);
+
+		if (randomGuy != null)
+		{
+			randomGuy.executeOrder(WorkHarder);
 		}
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
-		mousePosX = x;
-		mousePosY = y;
-		
-		var guysBelowPoint = Scene.the.getHeroesBelowPoint(x, y);
-		if (guysBelowPoint.length == 1) {
-			
-		}
+		guyBelowMouse = getGuyBelowCoords(x, y);
 	}
 
 	private static function onMouseWheel(delta: Int): Void {
@@ -213,9 +216,10 @@ class Main {
 		g.transformation = FastMatrix3.identity();
 		
 		var hudDisplays : Array<StringPair> = [
-			{ key: "Money: ", value: Std.string(money) },
-			{ key: "Cans: ", value: Std.string(cansNormal) },
-			{ key: "10ups: ", value: Std.string(cans10up) }
+			{ key: "Money: ", value: Std.string(FactoryState.the.money) },
+			{ key: "Cans: ", value: Std.string(FactoryState.the.cansNormal) },
+			{ key: "10ups: ", value: Std.string(FactoryState.the.cans10up) },
+			{ key: "Deaths: ", value: Std.string(FactoryState.the.casualties) }
 		];
 
 		g.font = font;
@@ -228,7 +232,7 @@ class Main {
 		var pad: Int = 5;
 		var spac: Int = 5;
 		g.color = Color.Black;
-		g.fillRect(width - (stringWidth + 2 * pad + spac), spac, stringWidth + 2 * pad, stringHeight * 3 + pad * 4);
+		g.fillRect(width - (stringWidth + 2 * pad + spac), spac, stringWidth + 2 * pad, stringHeight * hudDisplays.length + pad * (hudDisplays.length + 1));
 		g.color = Color.White;
 		var yOffset: Float = pad + spac;
 		for (i in 0...hudDisplays.length)
@@ -240,14 +244,19 @@ class Main {
 
 		// Debug only
 		#if debug
-		g.drawString("Age: " + Std.string(Staff.employeeAge[0]), 10, 10);
-		g.drawString("TfC: " + Std.string(Staff.employeeTimeForCan[0]), 10, 30);
-		g.drawString("PpC: " + Std.string(Staff.employeeProgressTo10UpPerCan[0]), 10, 50);
+		g.drawString("Age: " + Std.string(Staff.allguys[0].employeeAge), 10, 10);
+		g.drawString("TfC: " + Std.string(Staff.allguys[0].employeeTimeForCan), 10, 30);
+		g.drawString("PpC: " + Std.string(Staff.allguys[0].employeeProgressTo10UpPerCan), 10, 50);
 		
-		g.drawString("PtC: " + Std.string(Staff.employeeProgressToCan[0]), 10, 70);
-		g.drawString("P10: " + Std.string(Staff.employeeProgressTo10Up[0]), 10, 90);
-		g.drawString("Hth: " + Std.string(Staff.employeeHealth[0]), 10, 110);
+		g.drawString("PtC: " + Std.string(Staff.allguys[0].employeeProgressToCan), 10, 70);
+		g.drawString("P10: " + Std.string(Staff.allguys[0].employeeProgressTo10Up), 10, 90);
+		g.drawString("Hth: " + Std.string(Staff.allguys[0].employeeHealth), 10, 110);
 		#end
+		
+		if (guyBelowMouse != null)
+		{
+			g.drawString(guyBelowMouse.name, 10, 130);
+		}
 
 		g.end();
 		
