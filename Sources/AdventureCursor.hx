@@ -61,7 +61,7 @@ class AdventureCursor implements Cursor {
 		cursors[Take] = new ImageCursor(Assets.images.handcursor, 6, 9);
 		cursors[InventoryItem] = new ImageCursor(Assets.images.handcursor, 6, 9);
 		cursors[WontWork] = new ImageCursor(Assets.images.pizza_pixel, 5, 5); // TODO: cursor
-		cursors[WorkHarder] = new ImageCursor(Assets.images.spritze2, 16, 16);
+		cursors[WorkHarder] = new ImageCursor(Assets.images.spritze2, 32, 16);
 		currentCursor = null;
 		Mouse.get().showSystemCursor();
 		font = Assets.fonts.LiberationSans_Regular;
