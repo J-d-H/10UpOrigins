@@ -76,7 +76,6 @@ class Main {
 
 			backbuffer = Image.createRenderTarget(width, height + Inventory.height);
 			Scene.the.setSize(width, height);
-			//Scene.the.setSize(width, height);
 			
 			Inventory.y = height;
 
@@ -116,6 +115,7 @@ class Main {
 			mouseScenePosY = -1000;
 		}
 	}
+
 	public static function getSceneXY(x: Int, y: Int): Vector2i
 	{
 		return new Vector2i(Std.int((x - windowOffsetX) * windowScale) + Scene.the.screenOffsetX,
@@ -221,22 +221,35 @@ class Main {
 		
 		var computers : Array<Vector2> = new Array<Vector2>();
 		var bookshelves : Array<Vector2> = new Array<Vector2>();
-		var elevatorPositions : Array<Vector2> = new Array<Vector2>();
 		npcSpawns = new Array<Vector2>();
 		interactiveSprites = new Array();
 		for (i in 0...spriteCount) {
 			var sprite : kha2d.Sprite = null;
 			switch (sprites[i * 3]) {
 			case 0:
-				//agentSpawn = new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]);
+				sprite = new kha2d.Sprite(Assets.images._0);
+				sprite.x = sprites[i * 3 + 1];
+				sprite.y = sprites[i * 3 + 2];
+				sprite.maxspeedy = 0;
+				Scene.the.addOther(sprite);
 			case 1:
-				//computers.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
+				sprite = new kha2d.Sprite(Assets.images._1);
+				sprite.x = sprites[i * 3 + 1];
+				sprite.y = sprites[i * 3 + 2];
+				sprite.maxspeedy = 0;
+				Scene.the.addOther(sprite);
 			case 2:
-				elevatorPositions.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
+				sprite = new kha2d.Sprite(Assets.images._2);
+				sprite.x = sprites[i * 3 + 1];
+				sprite.y = sprites[i * 3 + 2];
+				sprite.maxspeedy = 0;
+				Scene.the.addOther(sprite);
 			case 3:
-				var door : Door = new Door(sprites[i * 3 + 1], sprites[i * 3 + 2]);
-				Scene.the.addOther(door);
-				interactiveSprites.push(door);
+				sprite = new kha2d.Sprite(Assets.images._3);
+				sprite.x = sprites[i * 3 + 1];
+				sprite.y = sprites[i * 3 + 2];
+				sprite.maxspeedy = 0;
+				Scene.the.addOther(sprite);
 			case 4:
 				bookshelves.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
 			case 5:
