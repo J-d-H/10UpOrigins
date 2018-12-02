@@ -11,7 +11,7 @@ class Staff
 	
 	public static function addGuy(slot:Int = -1): RandomGuy
 	{
-		var newGuy = new RandomGuy(Main.interactiveSprites);
+		var newGuy = new RandomGuy();
 		allguys.push(newGuy);
 		
 		/*for (npcSpawn in Main.npcSpawns)
@@ -27,7 +27,7 @@ class Staff
 
 		Scene.the.addHero(newGuy);
 		
-		newGuy.Status = WorkerWorking;
+		newGuy.status = WorkerWorking;
 		
 		return newGuy;
 	}
@@ -39,7 +39,7 @@ class Staff
 			if (allguys[i].updateState(deltaTime) == WorkerDying)
 			{
 				// Hire new employe
-				addGuy(i % Main.npcSpawns.length);
+				addGuy(i);
 			}
 		}
 	}
@@ -49,7 +49,7 @@ class Staff
 		var personMonths: Float = 0;
 		for (i in 0...allguys.length)
 		{
-			if (allguys[i].Status != WorkerDead)
+			if (allguys[i].status != WorkerDead)
 			{
 				// New hires get only paid for the partial month
 				personMonths += (Math.min(1 / 12, allguys[i].employeeAge) * 12) * allguys[i].employeeWage;
