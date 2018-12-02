@@ -1,5 +1,6 @@
 package manipulatables;
 
+import kha2d.Rectangle;
 import kha.graphics2.Graphics;
 import kha.Image;
 import kha2d.Scene;
@@ -60,5 +61,14 @@ class UseableSprite extends Sprite implements ManipulatableSprite
 		if (image != null) {
 			g.drawScaledSubImage(image, Std.int(animation.get() * width) % image.width, Math.floor(animation.get() * width / image.width) * height, width, height, x, y, drawWidth, drawHeight);
 		}
+	}
+
+	public override function collisionRect(): Rectangle
+	{
+		tempcollider.x = x - collider.width * scaleX + width;
+		tempcollider.y = y - collider.height * scaleY + height;
+		tempcollider.width  = collider.width * scaleX;
+		tempcollider.height = collider.height * scaleY;
+		return tempcollider;
 	}
 }
