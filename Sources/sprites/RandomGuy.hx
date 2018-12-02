@@ -196,9 +196,13 @@ class RandomGuy extends UseableSprite {
 		{
 			return OrderType.WontWork;
 		}
-		else if (status == WorkerDead)
+		else if (status == WorkerDying)
 		{
 			return OrderType.WontWork;
+		}
+		else if (status == WorkerDead)
+		{
+			return OrderType.Take;
 		}
 		else if (Std.is(selectedItem, manipulatables.Injection))
 		{
