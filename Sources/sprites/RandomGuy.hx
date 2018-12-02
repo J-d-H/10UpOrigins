@@ -2,17 +2,14 @@ package sprites;
 
 import manipulatables.Can10up;
 import manipulatables.ManipulatableSprite.OrderType;
-import js.html.rtc.PeerConnectionIceEventInit;
 import kha.Assets;
 import kha.Color;
 import kha.graphics2.Graphics;
 import kha.Image;
 import kha.math.FastMatrix3;
 import kha.math.Random;
-import kha.math.Vector2;
 import kha2d.Rectangle;
 import kha2d.Animation;
-import kha2d.Sprite;
 import manipulatables.UseableSprite;
 
 enum WorkerStatus
@@ -134,7 +131,7 @@ class RandomGuy extends UseableSprite {
 		employeeProgressTo10Up = 0;
 		employeeTimeToNextPause = timeToPause;
 		employeeTimeForCurrentPause = 0;
-		employeeHealth = 0.1;
+		employeeHealth = 1;
 
 		Status = intToStatus(Random.getUpTo(WORKER_WORKING_HARD));
 		
@@ -277,12 +274,12 @@ class RandomGuy extends UseableSprite {
 			}
 			case WorkerSleeping | WorkerPause:
 			{
-				employeeHealth += (healthPerFullPause / timeForPause) * deltaTime;
+				employeeHealth += (healthPerFullPause / timeForPause) * deltaTime * FactoryState.workTimeFactor;
 				// No overheal plz, we are not Wolfenstein
 				if (employeeHealth > 1)
 					employeeHealth = 1;
 
-				employeeTimeForCurrentPause += deltaTime;
+				employeeTimeForCurrentPause += deltaTime * FactoryState.workTimeFactor;
 				if (employeeTimeForCurrentPause >= timeForPause)
 				{
 					employeeTimeForCurrentPause -= timeForPause;
@@ -291,7 +288,7 @@ class RandomGuy extends UseableSprite {
 			}
 			case WorkerWorking | WorkerWorkingMotivated | WorkerWorkingHard:
 			{
-				employeeHealth += healthChangeWhenWorking * deltaTime;
+				employeeHealth += healthChangeWhenWorking * deltaTime * FactoryState.workTimeFactor;
 				if (employeeHealth <= 0)
 				{
 					Status = WorkerDying;
@@ -300,8 +297,8 @@ class RandomGuy extends UseableSprite {
 				}
 				else
 				{
-					employeeProgressToCan += deltaTime;
-					employeeTimeToNextPause -= deltaTime;
+					employeeProgressToCan += deltaTime * FactoryState.workTimeFactor;
+					employeeTimeToNextPause -= deltaTime * FactoryState.workTimeFactor;
 					// Needs pause
 					if (employeeTimeToNextPause <= 0)
 					{
