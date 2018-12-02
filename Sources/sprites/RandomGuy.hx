@@ -60,6 +60,8 @@ class RandomGuy extends UseableSprite {
 	public var employeeTimeToNextPause: Float;
 	public var employeeTimeForCurrentPause: Float;
 	public var employeeHealth: Float;
+	public var employeeCansNot: Int;
+	public var employeeCans10up: Int;
 
 	private static inline var WORKER_DEAD = 0;
 	private static inline var WORKER_DYING = WORKER_DEAD + 1;
@@ -136,6 +138,8 @@ class RandomGuy extends UseableSprite {
 		employeeTimeToNextPause = timeToPause;
 		employeeTimeForCurrentPause = 0;
 		employeeHealth = 1;
+		employeeCansNot = 0;
+		employeeCans10up = 0;
 
 		Status = intToStatus(Random.getUpTo(WORKER_WORKING_HARD));
 		
@@ -317,6 +321,7 @@ class RandomGuy extends UseableSprite {
 						{
 							// 10up can
 							employeeProgressTo10Up -= 1;
+							++employeeCans10up;
 							FactoryState.the.onCanProduced(true);
 							new manipulatables.Can10up(x + width / 2, y);
 						}
@@ -324,6 +329,7 @@ class RandomGuy extends UseableSprite {
 						{
 							// Normal can
 							employeeProgressTo10Up += employeeProgressTo10UpPerCan;
+							++employeeCansNot;
 							FactoryState.the.onCanProduced(false);
 							new manipulatables.CanNot(x + width / 2, y);
 						}

@@ -302,7 +302,9 @@ class Main {
 				{ key: "Age: ", value: Std.string(Math.floor(guyBelowMouse.employeeAge + 18)) },
 				{ key: "Health: ", value: Std.string(Math.round(guyBelowMouse.employeeHealth * 100)) + "%" },
 				{ key: "Speed: ", value: Std.string(Math.round((1 / guyBelowMouse.employeeTimeForCan) * 100) / 100) },
-				{ key: "Quality: ", value: Std.string(Math.round(guyBelowMouse.employeeProgressTo10UpPerCan * 100) / 100) }
+				{ key: "Quality: ", value: Std.string(Math.round(guyBelowMouse.employeeProgressTo10UpPerCan * 100) / 100) },
+				{ key: "Cans: ", value: Std.string(Math.floor(guyBelowMouse.employeeCansNot)) },
+				{ key: "10ups: ", value: Std.string(Math.floor(guyBelowMouse.employeeCans10up)) }
 			];
 			renderStatsBox(mouseWindowPosX, mouseWindowPosY, guyDisplays, g, false);
 		}
