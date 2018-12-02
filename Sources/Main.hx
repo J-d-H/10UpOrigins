@@ -43,7 +43,6 @@ class Main {
 	public static var interactiveSprites: Array<InteractiveSprite>;
 	private static var guyBelowMouse: RandomGuy = null;
 
-
 	public static var lastWindowWidth: Int;
 	public static var lastWindowHeigth: Int;
 	public static var mouseWindowPosX(default, null): Int;
@@ -245,7 +244,7 @@ class Main {
 		lastTime = Scheduler.time();
 		
 		Staff.update(deltaTime);
-
+		FactoryState.the.update(deltaTime);
 
 		if (mouseWindowPosX  < scrollArea)
 			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosX) / scrollArea));
@@ -277,6 +276,7 @@ class Main {
 		var spac: Int = 5;
 		
 		var hudDisplays : Array<StringPair> = [
+			{ key: "Time: ", value: Std.string(FactoryState.the.months) + "/" + Std.string(FactoryState.the.years) },
 			{ key: "Money: ", value: Std.string(FactoryState.the.money) },
 			{ key: "Cans: ", value: Std.string(FactoryState.the.cansNormal) },
 			{ key: "10ups: ", value: Std.string(FactoryState.the.cans10up) },
@@ -301,7 +301,7 @@ class Main {
 				{ key: guyBelowMouse.name, value: "" },
 				{ key: "Age: ", value: Std.string(Math.floor(guyBelowMouse.employeeAge + 18)) },
 				{ key: "Health: ", value: Std.string(Math.round(guyBelowMouse.employeeHealth * 100)) + "%" },
-				{ key: "Speed: ", value: Std.string(Math.round(guyBelowMouse.employeeTimeForCan * 100) / 100) },
+				{ key: "Speed: ", value: Std.string(Math.round((1 / guyBelowMouse.employeeTimeForCan) * 100) / 100) },
 				{ key: "Quality: ", value: Std.string(Math.round(guyBelowMouse.employeeProgressTo10UpPerCan * 100) / 100) }
 			];
 			renderStatsBox(mouseWindowPosX, mouseWindowPosY, guyDisplays, g, false);

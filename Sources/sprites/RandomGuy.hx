@@ -45,7 +45,6 @@ class RandomGuy extends UseableSprite {
 	private static inline var employeeStartingAge: Float = 0;
 	private static inline var employeeStartingTimeForCan: Float = 10;
 	private static inline var employeeStartingProgressTo10UpPerCan: Float = 0;
-	private static inline var agingSpeed: Float = 1 / 30;
 	private static inline var timeToPause: Float = 20;
 	private static inline var timeForPause: Float = 10;
 	private static inline var healthPerFullPause: Float = 0.2;
@@ -253,7 +252,7 @@ class RandomGuy extends UseableSprite {
 	public function updateState(deltaTime: Float): WorkerStatus
 	{
 		// Employee aging and stats up-/ downgrades
-		employeeAge += deltaTime * agingSpeed;
+		employeeAge += deltaTime * FactoryState.globalTimeSpeed;
 		// (0, 10), (20, 3), (40, 10)
 		employeeTimeForCan = 10 - 0.7 * employeeAge + 0.0175 * employeeAge * employeeAge;
 		// (0, 0), (20, 0.25), (40, 0)
@@ -305,13 +304,13 @@ class RandomGuy extends UseableSprite {
 						{
 							// 10up can
 							employeeProgressTo10Up -= 1;
-							++FactoryState.the.cans10up;
+							FactoryState.the.onCanProduced(true);
 						}
 						else
 						{
 							// Normal can
 							employeeProgressTo10Up += employeeProgressTo10UpPerCan;
-							++FactoryState.the.cansNormal;
+							FactoryState.the.onCanProduced(false);
 						}
 						employeeProgressToCan -= employeeTimeForCan;
 					}
