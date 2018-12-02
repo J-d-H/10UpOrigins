@@ -36,10 +36,10 @@ class Staff
 	{
 		for (i in 0...allguys.length)
 		{
-			if (allguys[i].updateState(deltaTime) == WorkerDead)
+			if (allguys[i].updateState(deltaTime) == WorkerDying)
 			{
 				// Hire new employe
-				addGuy(i);
+				addGuy(i % Main.npcSpawns.length);
 			}
 		}
 	}

@@ -18,6 +18,7 @@ import manipulatables.UseableSprite;
 enum WorkerStatus
 {
 	WorkerDead;
+	WorkerDying;
 	WorkerSleeping;
 	WorkerPause;
 	WorkerWorking;
@@ -61,7 +62,8 @@ class RandomGuy extends UseableSprite {
 	public var employeeHealth: Float;
 
 	private static inline var WORKER_DEAD = 0;
-	private static inline var WORKER_SLEEPING = WORKER_DEAD + 1;
+	private static inline var WORKER_DYING = WORKER_DEAD + 1;
+	private static inline var WORKER_SLEEPING = WORKER_DYING + 1;
 	private static inline var WORKER_PAUSE = WORKER_SLEEPING + 1;
 	private static inline var WORKER_WORKING = WORKER_PAUSE + 1;
 	private static inline var WORKER_WORKING_MOTIVATED = WORKER_WORKING + 1;
@@ -73,6 +75,7 @@ class RandomGuy extends UseableSprite {
 		return switch(value)
 		{
 			case WORKER_DEAD: WorkerStatus.WorkerDead;
+			case WORKER_DYING: WorkerStatus.WorkerDying;
 			case WORKER_SLEEPING: WorkerStatus.WorkerSleeping;
 			case WORKER_PAUSE: WorkerStatus.WorkerPause;
 			case WORKER_WORKING: WorkerStatus.WorkerWorking;
@@ -85,6 +88,7 @@ class RandomGuy extends UseableSprite {
 		return switch(status)
 		{
 			case WorkerStatus.WorkerDead: WORKER_DEAD;
+			case WorkerStatus.WorkerDying: WORKER_DYING;
 			case WorkerStatus.WorkerSleeping: WORKER_SLEEPING;
 			case WorkerStatus.WorkerPause: WORKER_PAUSE;
 			case WorkerStatus.WorkerWorking: WORKER_WORKING;
@@ -114,6 +118,7 @@ class RandomGuy extends UseableSprite {
 		walkLeft = Animation.createRange(10, 17, 4);
 		walkRight = Animation.createRange(1, 8, 4);
 		statusAnimations[WORKER_DEAD] = Animation.create(6);
+		statusAnimations[WORKER_DYING] = Animation.create(0);
 		statusAnimations[WORKER_SLEEPING] = Animation.create(14);
 		statusAnimations[WORKER_PAUSE] = standLeft;
 		statusAnimations[WORKER_WORKING] = new Animation([1, 2, 3, 3, 2, 1], 10);
@@ -129,7 +134,7 @@ class RandomGuy extends UseableSprite {
 		employeeProgressTo10Up = 0;
 		employeeTimeToNextPause = timeToPause;
 		employeeTimeForCurrentPause = 0;
-		employeeHealth = 1;
+		employeeHealth = 0.1;
 
 		Status = intToStatus(Random.getUpTo(WORKER_WORKING_HARD));
 		
@@ -218,7 +223,7 @@ class RandomGuy extends UseableSprite {
 		{
 			return OrderType.WontWork;
 		}
-		else if (Status == WorkerDead)
+		else if (Status == WorkerDying || Status == WorkerDead)
 		{
 			return OrderType.WontWork;
 		}
@@ -236,7 +241,7 @@ class RandomGuy extends UseableSprite {
 		case WorkHarder:
 			switch (Status)
 			{
-			case WorkerDead:
+			case WorkerDying, WorkerDead:
 				throw "Findet nicht statt.";
 			case WorkerSleeping, WorkerPause:
 				Status = WorkerWorking;
@@ -262,6 +267,10 @@ class RandomGuy extends UseableSprite {
 		// Pause progress
 		switch (Status)
 		{
+			case WorkerDying:
+			{
+				Status = WorkerDead;
+			}
 			case WorkerDead:
 			{
 				// ...
@@ -285,8 +294,9 @@ class RandomGuy extends UseableSprite {
 				employeeHealth += healthChangeWhenWorking * deltaTime;
 				if (employeeHealth <= 0)
 				{
-					Status = WorkerDead;
+					Status = WorkerDying;
 					++FactoryState.the.casualties;
+					new manipulatables.CanCross(x + width / 2, y);
 				}
 				else
 				{
