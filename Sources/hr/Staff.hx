@@ -66,7 +66,7 @@ class Staff
 			// (0, 10), (20, 3), (40, 10)
 			employeeTimeForCan[i] = 10 - 0.7 * employeeAge[i] + 0.0175 * employeeAge[i] * employeeAge[i];
 			// (0, 0), (20, 0.25), (40, 0)
-			employeeProgressTo10UpPerCan[i] = 0 + 0.025 * employeeAge[i] - 0.00625 * employeeAge[i] * employeeAge[i];
+			employeeProgressTo10UpPerCan[i] = 0 + 0.025 * employeeAge[i] - 0.000625 * employeeAge[i] * employeeAge[i];
 
 			// Pause progress
 			switch (employee.Status)
