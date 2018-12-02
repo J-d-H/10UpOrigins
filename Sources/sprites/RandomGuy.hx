@@ -29,9 +29,9 @@ class RandomGuy extends UseableSprite {
 	private var standRight: Animation;
 	private var walkLeft: Animation;
 	private var walkRight: Animation;
-	private var statusAnimations = new Array<Animation>();
+	private var statusAnimations = new Map<WorkerStatus, Animation>();
 	public var lookLeft: Bool;
-	
+
 	private var stuff: Array<InteractiveSprite>;
 	
 	public var sleeping: Bool;
@@ -63,54 +63,21 @@ class RandomGuy extends UseableSprite {
 	public var employeeCansNot: Int;
 	public var employeeCans10up: Int;
 
-	private static inline var WORKER_DEAD = 0;
-	private static inline var WORKER_DYING = WORKER_DEAD + 1;
-	private static inline var WORKER_SLEEPING = WORKER_DYING + 1;
-	private static inline var WORKER_PAUSE = WORKER_SLEEPING + 1;
-	private static inline var WORKER_WORKING = WORKER_PAUSE + 1;
-	private static inline var WORKER_WORKING_MOTIVATED = WORKER_WORKING + 1;
-	private static inline var WORKER_WORKING_HARD = WORKER_WORKING_MOTIVATED + 1;
-	private var status: Int;
+	public var status(default, set): WorkerStatus;
 
-	public var Status(get, set): WorkerStatus;
-	private function intToStatus(value: Int):WorkerStatus {
-		return switch(value)
-		{
-			case WORKER_DEAD: WorkerStatus.WorkerDead;
-			case WORKER_DYING: WorkerStatus.WorkerDying;
-			case WORKER_SLEEPING: WorkerStatus.WorkerSleeping;
-			case WORKER_PAUSE: WorkerStatus.WorkerPause;
-			case WORKER_WORKING: WorkerStatus.WorkerWorking;
-			case WORKER_WORKING_HARD: WorkerStatus.WorkerWorkingHard;
-			case WORKER_WORKING_MOTIVATED: WorkerStatus.WorkerWorkingMotivated;
-			default: throw "This is not happening.";
-		}
-	}
-	private function statusToInt(status: WorkerStatus):Int {
-		return switch(status)
-		{
-			case WorkerStatus.WorkerDead: WORKER_DEAD;
-			case WorkerStatus.WorkerDying: WORKER_DYING;
-			case WorkerStatus.WorkerSleeping: WORKER_SLEEPING;
-			case WorkerStatus.WorkerPause: WORKER_PAUSE;
-			case WorkerStatus.WorkerWorking: WORKER_WORKING;
-			case WorkerStatus.WorkerWorkingHard: WORKER_WORKING_HARD;
-			case WorkerStatus.WorkerWorkingMotivated: WORKER_WORKING_MOTIVATED;
-		}
-	}
-	private function get_Status(): WorkerStatus { return intToStatus(status); }
+	@:noCompletion
+	private function set_status(value: WorkerStatus): WorkerStatus
+	{
+		status = value;
 	
-	public function set_Status(value: WorkerStatus): WorkerStatus {
-		status = statusToInt(value);
-		
 		setAnimation(statusAnimations[status]);
 
-		sleeping = (status == WORKER_SLEEPING || status == WORKER_DEAD);
+		sleeping = (status == WorkerSleeping || status == WorkerDead);
 
 		return value;
 	}
 	
-	public function new(stuff: Array<InteractiveSprite>, customlook: Bool = false) {
+	public function new(customlook: Bool = false) {
 		super(names[Random.getUpTo(names.length - 1)], Assets.images.nullachtsechzehnmann, 0, 0, Std.int(720 / 9), Std.int(256 / 2));
 		collider = new Rectangle(0, 0, width, height -20);
 		zzzzz = Assets.images.zzzzz;
@@ -119,13 +86,13 @@ class RandomGuy extends UseableSprite {
 		standRight = Animation.create(0);
 		walkLeft = Animation.createRange(10, 17, 4);
 		walkRight = Animation.createRange(1, 8, 4);
-		statusAnimations[WORKER_DEAD] = Animation.create(6);
-		statusAnimations[WORKER_DYING] = Animation.create(0);
-		statusAnimations[WORKER_SLEEPING] = Animation.create(14);
-		statusAnimations[WORKER_PAUSE] = standLeft;
-		statusAnimations[WORKER_WORKING] = new Animation([1, 2, 3, 3, 2, 1], 10);
-		statusAnimations[WORKER_WORKING_MOTIVATED] = new Animation([1, 2, 2], 6);
-		statusAnimations[WORKER_WORKING_HARD] = new Animation([1, 2, 3, 3, 2, 1, 10, 11, 12, 12, 11, 10], 4);
+		statusAnimations[WorkerDead] = Animation.create(6);
+		statusAnimations[WorkerDying] = Animation.create(0);
+		statusAnimations[WorkerSleeping] = Animation.create(14);
+		statusAnimations[WorkerPause] = standLeft;
+		statusAnimations[WorkerWorking] = new Animation([1, 2, 3, 3, 2, 1], 10);
+		statusAnimations[WorkerWorkingMotivated] = new Animation([1, 2, 2], 6);
+		statusAnimations[WorkerWorkingHard] = new Animation([1, 2, 3, 3, 2, 1, 10, 11, 12, 12, 11, 10], 4);
 		lookLeft = false;
 		sleeping = false;
 		
@@ -141,17 +108,8 @@ class RandomGuy extends UseableSprite {
 		employeeCansNot = 0;
 		employeeCans10up = 0;
 
-		Status = intToStatus(Random.getUpTo(WORKER_WORKING_HARD));
-		
-		this.stuff = [];
-		if (stuff != null) {
-			/*for (thing in stuff) {
-				if (thing.isUseable && thing.isUsableFrom(this) && (Std.is(thing, Computer) || Std.is(thing, Coffee))) {
-					this.stuff.push(thing);
-				}
-			}*/
-		}
-		
+		status = WorkerPause;
+
 		if (!customlook) {
 			switch (name.substr(-1))
 			{
@@ -202,7 +160,7 @@ class RandomGuy extends UseableSprite {
 				if (angle != 0) g.pushTransformation(g.transformation.multmat(FastMatrix3.translation(x + originX, y + originY)).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-x - originX, -y - originY)));
 				g.drawScaledSubImage(image, Std.int(animation.get() * w) % image.width, Math.floor(animation.get() * w / image.width) * h, w, h, Math.round(x - collider.x * scaleX), Math.round(y - collider.y * scaleY), width, height);
 				if (angle != 0) g.popTransformation();
-				if (Status != WorkerDead)
+				if (status != WorkerDead)
 				{
 					g.drawSubImage(zzzzz, x - 40, y - 20, zzzzz.width * zzzzzAnim.getIndex() / 3, 0, zzzzz.width / 3, zzzzz.height);
 				}
@@ -226,7 +184,7 @@ class RandomGuy extends UseableSprite {
 		{
 			return OrderType.WontWork;
 		}
-		else if (Status == WorkerDying || Status == WorkerDead)
+		else if (status == WorkerDead)
 		{
 			return OrderType.WontWork;
 		}
@@ -242,16 +200,16 @@ class RandomGuy extends UseableSprite {
 		switch (order)
 		{
 		case WorkHarder:
-			switch (Status)
+			switch (status)
 			{
 			case WorkerDying, WorkerDead:
 				throw "Findet nicht statt.";
 			case WorkerSleeping, WorkerPause:
-				Status = WorkerWorking;
+				status = WorkerWorking;
 			case WorkerWorking, WorkerWorkingMotivated:
-				Status = WorkerWorkingHard;
+				status = WorkerWorkingHard;
 			case WorkerWorkingHard:
-				Status = WorkerWorkingHard;
+				status = WorkerWorkingHard;
 			}
 		default:
 			super.executeOrder(order);
@@ -269,11 +227,11 @@ class RandomGuy extends UseableSprite {
 		employeeWage = 0.1 + 0.1 * employeeAge;
 
 		// Pause progress
-		switch (Status)
+		switch (status)
 		{
 			case WorkerDying:
 			{
-				Status = WorkerDead;
+				status = WorkerDead;
 			}
 			case WorkerDead:
 			{
@@ -290,7 +248,7 @@ class RandomGuy extends UseableSprite {
 				if (employeeTimeForCurrentPause >= timeForPause)
 				{
 					employeeTimeForCurrentPause -= timeForPause;
-					Status = employeeHealth > 0.99 ? WorkerWorkingMotivated : WorkerWorking;
+					status = employeeHealth > 0.99 ? WorkerWorkingMotivated : WorkerWorking;
 				}
 			}
 			case WorkerWorking | WorkerWorkingMotivated | WorkerWorkingHard:
@@ -298,7 +256,7 @@ class RandomGuy extends UseableSprite {
 				employeeHealth += healthChangeWhenWorking * deltaTime * FactoryState.workTimeFactor;
 				if (employeeHealth <= 0)
 				{
-					Status = WorkerDying;
+					status = WorkerDying;
 					++FactoryState.the.casualties;
 					new manipulatables.CanCross(x + width / 2, y);
 				}
@@ -310,7 +268,7 @@ class RandomGuy extends UseableSprite {
 					if (employeeTimeToNextPause <= 0)
 					{
 						employeeTimeToNextPause += timeToPause;
-						Status = WorkerPause;
+						status = WorkerPause;
 					}
 					// Can finished
 					else if (employeeProgressToCan >= employeeTimeForCan)
@@ -337,6 +295,6 @@ class RandomGuy extends UseableSprite {
 			}
 		}
 
-		return Status;
+		return status;
 	}
 }
