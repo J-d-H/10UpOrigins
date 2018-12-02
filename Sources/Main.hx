@@ -2,7 +2,6 @@ package;
 
 import kha.math.Vector2i;
 import manipulatables.Injection;
-import kha.Canvas;
 import kha.Window;
 import kha.math.Random;
 import sprites.*;
@@ -130,7 +129,8 @@ class Main {
 			if (Std.is(guy, RandomGuy))
 			{
 				var randomGuy : RandomGuy = cast guy;
-				return randomGuy;
+				if (randomGuy.Status != WorkerDead)
+					return randomGuy;
 			}
 		}
 		return null;
