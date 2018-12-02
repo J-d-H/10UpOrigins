@@ -21,6 +21,8 @@ import kha2d.Scene;
 import kha2d.Tilemap;
 import kha2d.Tile;
 
+typedef StringPair = { key : String, value : String }
+
 class Main {
 	public static var width(default, null): Int = 1024;
 	public static var height(default, null): Int = 768;
@@ -39,10 +41,8 @@ class Main {
 	public static var Player(default, null) = "Boss";
 	public static var npcSpawns : Array<Vector2> = new Array<Vector2>();
 	public static var interactiveSprites: Array<InteractiveSprite>;
+	private static var guyBelowMouse: RandomGuy = null;
 
-	private static var money: Int = 0;
-	private static var cansNormal: Int = 0;
-	private static var cans10up: Int = 0;
 
 	public static var lastWindowWidth: Int;
 	public static var lastWindowHeigth: Int;
@@ -95,29 +95,41 @@ class Main {
 		mouseScenePosY = Std.int((y - windowOffsetY) * windowScale) + Scene.the.screenOffsetY;
 	}
 
-	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
-		
-	}
-
-	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
-		updateMouse(x, y);
-		
-		trace("window: " + x + "/" + y);
-		trace("scene: " + mouseScenePosX + "/" + mouseScenePosY);
-
-		var guysBelowPoint = Scene.the.getHeroesBelowPoint(mouseScenePosX, mouseScenePosY);
+	private static function getGuyBelowCoords(sceneX: Int, sceneY: Int): RandomGuy
+	{
+		var guysBelowPoint = Scene.the.getHeroesBelowPoint(sceneX, sceneY);
 		for (guy in guysBelowPoint)
 		{
 			if (Std.is(guy, RandomGuy))
 			{
 				var randomGuy : RandomGuy = cast guy;
-				randomGuy.executeOrder(WorkHarder);
+				return randomGuy;
 			}
+		}
+		return null;
+	}
+
+	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
+		
+	}
+
+	private static function onMouseUp(button: Int, x: Int, y: Int): Void
+	{
+		updateMouse(x, y);
+		trace("window: " + x + "/" + y);
+		trace("scene: " + mouseScenePosX + "/" + mouseScenePosY);
+
+		var randomGuy: RandomGuy = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
+
+		if (randomGuy != null)
+		{
+			randomGuy.executeOrder(WorkHarder);
 		}
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
 		updateMouse(x, y);
+		guyBelowMouse = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
 	}
 
 	private static function onMouseWheel(delta: Int): Void {
@@ -260,46 +272,48 @@ class Main {
 		
 		g.transformation = FastMatrix3.identity();
 
-		g.color = Color.White;
+		var hudDisplays : Array<StringPair> = [
+			{ key: "Money: ", value: Std.string(FactoryState.the.money) },
+			{ key: "Cans: ", value: Std.string(FactoryState.the.cansNormal) },
+			{ key: "10ups: ", value: Std.string(FactoryState.the.cans10up) },
+			{ key: "Deaths: ", value: Std.string(FactoryState.the.casualties) }
+		];
+
 		g.font = font;
 		g.fontSize = 24;
-		var k0: String = "Money: ";
-		var k1: String = "Cans: ";
-		var k2: String = "10ups: ";
-		var v0: String = Std.string(money);
-		var v1: String = Std.string(cansNormal);
-		var v2: String = Std.string(cans10up);
-		var s0: String = k0 + v0;
-		var s1: String = k1 + v1;
-		var s2: String = k2 + v2;
-		var stringWidth: Float = Math.max(Math.max(font.width(g.fontSize, s0), font.width(g.fontSize, s1)), font.width(g.fontSize, s2));
-		var stringHeight: Float = font.height(g.fontSize);
+		var stringWidth: Float = 0;
+		for (i in 0...hudDisplays.length)
+			stringWidth = Math.max(g.font.width(g.fontSize, hudDisplays[i].key + hudDisplays[i].value), stringWidth);
+		var stringHeight: Float = g.font.height(g.fontSize);
 
 		var pad: Int = 5;
 		var spac: Int = 5;
 		g.color = Color.Black;
-		g.fillRect(width - (stringWidth + 2 * pad + spac), spac, stringWidth + 2 * pad, stringHeight * 3 + pad * 4);
+		g.fillRect(width - (stringWidth + 2 * pad + spac), spac, stringWidth + 2 * pad, stringHeight * hudDisplays.length + pad * (hudDisplays.length + 1));
 		g.color = Color.White;
 		var yOffset: Float = pad + spac;
-		g.drawString(k0, width - (stringWidth + pad + spac), yOffset);
-		g.drawString(v0, width - (font.width(g.fontSize, v0) + pad + spac), yOffset);
+		for (i in 0...hudDisplays.length)
+		{
+			g.drawString(hudDisplays[i].key, width - (stringWidth + pad + spac), yOffset);
+			g.drawString(hudDisplays[i].value, width - (g.font.width(g.fontSize, hudDisplays[i].value) + pad + spac), yOffset);
 		yOffset += pad + stringHeight;
-		g.drawString(k1, width - (stringWidth + pad + spac), yOffset);
-		g.drawString(v1, width - (font.width(g.fontSize, v1) + pad + spac), yOffset);
-		yOffset += pad + stringHeight;
-		g.drawString(k2, width - (stringWidth + pad + spac), yOffset);
-		g.drawString(v2, width - (font.width(g.fontSize, v2) + pad + spac), yOffset);
+		}
 
 		// Debug only
 		#if debug
-		g.drawString("Age: " + Std.string(Staff.employeeAge[0]), 10, 10);
-		g.drawString("TfC: " + Std.string(Staff.employeeTimeForCan[0]), 10, 30);
-		g.drawString("PpC: " + Std.string(Staff.employeeProgressTo10UpPerCan[0]), 10, 50);
+		g.drawString("Age: " + Std.string(Staff.allguys[0].employeeAge), 10, 10);
+		g.drawString("TfC: " + Std.string(Staff.allguys[0].employeeTimeForCan), 10, 30);
+		g.drawString("PpC: " + Std.string(Staff.allguys[0].employeeProgressTo10UpPerCan), 10, 50);
 		
-		g.drawString("PtC: " + Std.string(Staff.employeeProgressToCan[0]), 10, 70);
-		g.drawString("P10: " + Std.string(Staff.employeeProgressTo10Up[0]), 10, 90);
-		g.drawString("Hth: " + Std.string(Staff.employeeHealth[0]), 10, 110);
+		g.drawString("PtC: " + Std.string(Staff.allguys[0].employeeProgressToCan), 10, 70);
+		g.drawString("P10: " + Std.string(Staff.allguys[0].employeeProgressTo10Up), 10, 90);
+		g.drawString("Hth: " + Std.string(Staff.allguys[0].employeeHealth), 10, 110);
 		#end
+
+		if (guyBelowMouse != null)
+		{
+			g.drawString(guyBelowMouse.name, 10, 130);
+		}
 
 		g.end();
 		
