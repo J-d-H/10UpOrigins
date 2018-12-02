@@ -1,5 +1,7 @@
 package;
 
+import kha.Canvas;
+import kha.Window;
 import kha.math.Random;
 import sprites.*;
 import hr.Staff;
@@ -20,8 +22,8 @@ import kha2d.Tilemap;
 import kha2d.Tile;
 
 class Main {
-	public static inline var width: Int = 1024;
-	public static inline var height: Int = 768;
+	public static var width(default, null): Int = 1024;
+	public static var height(default, null): Int = 768;
 	public static inline var scaling: Int = 1;
 	public static inline var tileWidth: Int = 32;
 	public static inline var tileHeight: Int = 32;
@@ -38,20 +40,72 @@ class Main {
 	public static var npcSpawns : Array<Vector2> = new Array<Vector2>();
 	public static var interactiveSprites: Array<InteractiveSprite>;
 
-	private static var mousePosX: Int = Std.int(width / 2);
-	private static var mousePosY: Int = Std.int(height / 2);
 	private static var money: Int = 0;
 	private static var cansNormal: Int = 0;
 	private static var cans10up: Int = 0;
+
+	public static var lastWindowWidth: Int;
+	public static var lastWindowHeigth: Int;
+	public static var mouseWindowPosX(default, null): Int;
+	public static var mouseWindowPosY(default, null): Int;
+	public static var mouseScenePosX(default, null): Int;
+	public static var mouseScenePosY(default, null): Int;
+	private static var window: Window;
+	private static var windowScale: Float;
+	private static var windowOffsetX: Int;
+	private static var windowOffsetY: Int;
+	private static var scene: Scene;
+
+	private static function updateMouse(x: Int, y: Int): Void
+	{
+		var updatedWindow = false;
+		if (lastWindowWidth != window.width || lastWindowHeigth != window.height)
+		{
+			updatedWindow = true;
+			lastWindowWidth = window.width;
+			lastWindowHeigth = window.height;
+			width = Std.int(Math.min(Scene.the.getWidth(), window.width));
+			height = Std.int(Math.min(Scene.the.getHeight(), window.height));
+			// TODO: fix backbuffer
+			var scaleX = width/window.width;
+			var scaleY = height/window.height;
+			if (scaleX < 1)
+			{
+				windowScale = Math.max(scaleX, scaleY);
+			}
+			else
+			{
+				windowScale = Math.min(scaleX, scaleY);
+			}
+			windowOffsetX = Std.int((window.width - width/windowScale) / 2);
+			windowOffsetY = Std.int((window.height - height/windowScale) / 2);
+
+			trace("  Gamescreen: " + width + "/" + height);
+			trace("       Scene: " + Scene.the.getWidth() + "/" + Scene.the.getHeight());
+			trace("      Window: " + window.width + "/" + window.height);
+			trace("  backbuffer: " + backbuffer.width + "/" + backbuffer.height);
+			trace(" windowScale: " + windowScale);
+			trace("windowOffset: " + windowOffsetX + "/" + windowOffsetY);
+		}
+		
+		mouseWindowPosX = x;
+		mouseWindowPosY = y;
+
+		mouseScenePosX = Std.int((x - windowOffsetX) * windowScale) + Scene.the.screenOffsetX;
+		mouseScenePosY = Std.int((y - windowOffsetY) * windowScale) + Scene.the.screenOffsetY;
+	}
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
 		
 	}
 
 	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
-		var worldX = x + Scene.the.screenOffsetX;
-		var worldY = y + Scene.the.screenOffsetY;
-		var guysBelowPoint = Scene.the.getHeroesBelowPoint(x, y);
+		updateMouse(x, y);
+		
+		trace("window: " + x + "/" + y);
+		trace("scene: " + mouseScenePosX + "/" + mouseScenePosY);
+
+		var guysBelowPoint = Scene.the.getHeroesBelowPoint(mouseScenePosX, mouseScenePosY);
 		for (guy in guysBelowPoint)
 		{
 			if (Std.is(guy, RandomGuy))
@@ -63,13 +117,7 @@ class Main {
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
-		mousePosX = x;
-		mousePosY = y;
-		
-		var guysBelowPoint = Scene.the.getHeroesBelowPoint(x, y);
-		if (guysBelowPoint.length == 1) {
-			
-		}
+		updateMouse(x, y);
 	}
 
 	private static function onMouseWheel(delta: Int): Void {
@@ -84,6 +132,7 @@ class Main {
 		font = Assets.fonts.LiberationSans_Regular;
 		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
 		initLevel();
+		scene = Scene.the;
 		Scene.the.camx = Std.int(width / 2);
 		
 		for (i in 0...npcSpawns.length)
@@ -185,17 +234,18 @@ class Main {
 		
 		Staff.update(deltaTime);
 
-		if (mousePosX  < scrollArea)
-			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mousePosX) / scrollArea));
-		if (mousePosX > width - scrollArea)
-			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (width - mousePosX)) / scrollArea));
+
+		if (mouseWindowPosX  < scrollArea)
+			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosX) / scrollArea));
+		if (mouseWindowPosY > window.width - scrollArea)
+			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (window.width - mouseWindowPosX)) / scrollArea));
 		Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
 		Scene.the.camx = Std.int(Math.min(Scene.the.camx, map.length * tileWidth - Std.int(width / 2)));
 
-		if (mousePosY < scrollArea)
-			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mousePosY) / scrollArea));
-		if (mousePosY > height - scrollArea)
-			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mousePosY)) / scrollArea));
+		if (mouseWindowPosY < scrollArea)
+			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosY) / scrollArea));
+		if (mouseWindowPosY > window.height - scrollArea)
+			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mouseWindowPosY)) / scrollArea));
 		Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
 		Scene.the.camy = Std.int(Math.min(Scene.the.camy, map[0].length * tileHeight - Std.int(height / 2)));
 
@@ -258,13 +308,20 @@ class Main {
 		framebuffer.g2.end();
 	}
 
+	public static function onResize(width: Int, height: Int): Void
+	{
+		trace("RESIZE: " + width + "/" + height);
+	}
+
 	public static function main() {
-		System.start({title: "10Up Origins", width: width, height: height}, function (_) {
+		System.start({title: "10Up Origins", width: width, height: height}, function (window) {
 			// Just loading everything is ok for small projects
 			Assets.loadEverything(function () {
 				// Avoid passing update/render directly,
 				// so replacing them via code injection works
 				init();
+				Main.window = window;
+				window.notifyOnResize(function (width, height) { onResize(width, height); });
 				Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
 				System.notifyOnFrames(function (framebuffers) { render(framebuffers[0]); });
 			});
