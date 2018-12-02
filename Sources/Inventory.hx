@@ -8,17 +8,24 @@ import manipulatables.UseableSprite;
 
 class Inventory {
 	public static var y : Int;
-	public static var itemWidth = 32;
+	public static var itemWidth = 32 * 2;
 	public static var spacing = 5;
-	public static var itemHeight = 32;
+	public static var itemHeight = 32 * 2;
 	static var items : Array<UseableSprite> = new Array();
 	static var selected : Int = -1;
 	static var offset : Int = 0;
 	
+	public static var height(get, never): Int;
+	@:noCompletion
+	private static function get_height(): Int
+	{
+		return itemHeight + 2 * spacing;
+	}
+
 	public static function init() {
 		items = new Array();
 		selected = -1;
-		y = Main.height - itemHeight - 2 * spacing;
+		y = Main.height - height;
 	}
 	
 	public static function isEmpty() : Bool {
@@ -71,7 +78,8 @@ class Inventory {
 		var itemX = spacing;
 		var itemY = y + spacing;
 		g.color = Color.Black;
-		g.fillRect(0, y, Main.width, itemHeight + 2 * spacing);
+		g.fillRect(0, y, Main.width, height);
+		g.color = Color.White;
 		for (i in offset...items.length) {
 			items[i].renderForInventory(g, itemX, itemY, itemWidth, itemHeight);
 			if (i == selected) {

@@ -112,7 +112,7 @@ class RandomGuy extends UseableSprite {
 	
 	public function new(stuff: Array<InteractiveSprite>, customlook: Bool = false) {
 		super(names[Random.getUpTo(names.length - 1)], Assets.images.nullachtsechzehnmann, 0, 0, Std.int(720 / 9), Std.int(256 / 2));
-		collider = new Rectangle(-20, 0, width + 40, height);
+		collider = new Rectangle(0, 0, width, height -20);
 		zzzzz = Assets.images.zzzzz;
 		zzzzzAnim = Animation.createRange(0,2, 6);
 		standLeft = Animation.create(9);
@@ -211,12 +211,10 @@ class RandomGuy extends UseableSprite {
 		else {
 			super.render(g);
 			#if debug
-			g.color = kha.Color.fromBytes(255,0,0);
-			var rect = collisionRect();
-			g.drawRect( rect.x, rect.y, rect.width, rect.height );
-			g.color = Color.Black;
-			g.drawRect( x - collider.x, y - collider.y, width, height );
-			g.color = Color.fromBytes(0,255,0);
+			g.color = Color.fromBytes(255, 0, 0);
+			g.drawRect(x - collider.x * scaleX, y - collider.y * scaleY, width, height);
+			g.color = Color.fromBytes(0, 255, 0);
+			g.drawRect(tempcollider.x, tempcollider.y, tempcollider.width, tempcollider.height);
 			g.fillRect( x - 2, y - 2, 5, 5 );
 			#end
 		}
@@ -236,7 +234,7 @@ class RandomGuy extends UseableSprite {
 		{
 			return OrderType.WorkHarder;
 		}
-		return OrderType.WontWork;
+		return OrderType.ToolTip;
 	}
 
 	public override function executeOrder(order : OrderType) : Void

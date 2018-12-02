@@ -1,5 +1,7 @@
 package;
 
+import kha.math.Vector2i;
+import manipulatables.Injection;
 import kha.Canvas;
 import kha.Window;
 import kha.math.Random;
@@ -24,9 +26,11 @@ import kha2d.Tile;
 typedef StringPair = { key : String, value : String }
 
 class Main {
+	
+	private static inline var minWidth: Int = 600;
+	private static inline var minHeight: Int = 200;
 	public static var width(default, null): Int = 1024;
 	public static var height(default, null): Int = 768;
-	public static inline var scaling: Int = 1;
 	public static inline var tileWidth: Int = 32;
 	public static inline var tileHeight: Int = 32;
 	private static inline var scrollArea: Int = 32;
@@ -55,6 +59,8 @@ class Main {
 	private static var windowOffsetY: Int;
 	private static var scene: Scene;
 
+	private static var adventureCursor: AdventureCursor;
+
 	private static function updateMouse(x: Int, y: Int): Void
 	{
 		var updatedWindow = false;
@@ -65,19 +71,27 @@ class Main {
 			lastWindowHeigth = window.height;
 			width = Std.int(Math.min(Scene.the.getWidth(), window.width));
 			height = Std.int(Math.min(Scene.the.getHeight(), window.height));
-			// TODO: fix backbuffer
-			var scaleX = width/window.width;
-			var scaleY = height/window.height;
+			width = Std.int(Math.max(minWidth, width));
+			height = Std.int(Math.max(minHeight, height));
+
+			backbuffer = Image.createRenderTarget(width, height + Inventory.height);
+			Scene.the.setSize(width, height);
+			//Scene.the.setSize(width, height);
+			
+			Inventory.y = height;
+
+			var scaleX = backbuffer.width/window.width;
+			var scaleY = backbuffer.height/window.height;
 			if (scaleX < 1)
-			{
-				windowScale = Math.max(scaleX, scaleY);
-			}
-			else
 			{
 				windowScale = Math.min(scaleX, scaleY);
 			}
-			windowOffsetX = Std.int((window.width - width/windowScale) / 2);
-			windowOffsetY = Std.int((window.height - height/windowScale) / 2);
+			else
+			{
+				windowScale = Math.max(scaleX, scaleY);
+			}
+			windowOffsetX = Std.int((window.width - backbuffer.width/windowScale) / 2);
+			windowOffsetY = Std.int((window.height - backbuffer.height/windowScale) / 2);
 
 			trace("  Gamescreen: " + width + "/" + height);
 			trace("       Scene: " + Scene.the.getWidth() + "/" + Scene.the.getHeight());
@@ -90,13 +104,27 @@ class Main {
 		mouseWindowPosX = x;
 		mouseWindowPosY = y;
 
-		mouseScenePosX = Std.int((x - windowOffsetX) * windowScale) + Scene.the.screenOffsetX;
-		mouseScenePosY = Std.int((y - windowOffsetY) * windowScale) + Scene.the.screenOffsetY;
+		if (mouseWindowPosY < width)
+		{
+			var sceneXY = getSceneXY(x, y);
+			mouseScenePosX = sceneXY.x;
+			mouseScenePosY = sceneXY.y;
+		}
+		else
+		{
+			mouseScenePosX = -1000;
+			mouseScenePosY = -1000;
+		}
+	}
+	public static function getSceneXY(x: Int, y: Int): Vector2i
+	{
+		return new Vector2i(Std.int((x - windowOffsetX) * windowScale) + Scene.the.screenOffsetX,
+		                    Std.int((y - windowOffsetY) * windowScale) + Scene.the.screenOffsetY);
 	}
 
 	private static function getGuyBelowCoords(sceneX: Int, sceneY: Int): RandomGuy
 	{
-		var guysBelowPoint = Scene.the.getHeroesBelowPoint(sceneX, sceneY);
+		var guysBelowPoint = Scene.the.getSpritesBelowPoint(sceneX, sceneY);
 		for (guy in guysBelowPoint)
 		{
 			if (Std.is(guy, RandomGuy))
@@ -109,21 +137,23 @@ class Main {
 	}
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
-		
+		updateMouse(x,y);
+
+		adventureCursor.onMouseDown(button, x, y);
 	}
 
 	private static function onMouseUp(button: Int, x: Int, y: Int): Void
 	{
 		updateMouse(x, y);
-		trace("window: " + x + "/" + y);
-		trace("scene: " + mouseScenePosX + "/" + mouseScenePosY);
 
-		var randomGuy: RandomGuy = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
+		adventureCursor.onMouseUp(button,x,y);
+
+		/*var randomGuy: RandomGuy = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
 
 		if (randomGuy != null)
 		{
 			randomGuy.executeOrder(WorkHarder);
-		}
+		}*/
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
@@ -141,10 +171,16 @@ class Main {
 		Random.init(Std.int(System.time * 100));
 		lastTime = Scheduler.time();
 		font = Assets.fonts.LiberationSans_Regular;
-		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
+		Inventory.init();
+		Inventory.pick(new Injection(0,0));
+		Inventory.pick(new RandomGuy(interactiveSprites));
+		backbuffer = Image.createRenderTarget(width, height);
 		initLevel();
 		scene = Scene.the;
+		updateMouse(Std.int(window.width/2), Std.int(window.height/2));
 		Scene.the.camx = Std.int(width / 2);
+		
+		adventureCursor = new AdventureCursor();
 		
 		for (i in 0...npcSpawns.length)
 		{
@@ -176,7 +212,7 @@ class Main {
 			sprites.push(blob.readS32BE(fileIndex)); fileIndex += 4;
 		}
 		
-		Scene.the.setSize(width * scaling, height * scaling);
+		Scene.the.setSize(width, height);
 		Scene.the.clear();
 		Scene.the.setBackgroundColor(Color.fromBytes(255, 255, 255));
 		var tilemap = new Tilemap(Assets.images.tileset, tileWidth, tileHeight, map, tileColissions);
@@ -243,22 +279,28 @@ class Main {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
 		
+		var sceneXY = getSceneXY(mouseWindowPosX, mouseWindowPosY);
+		mouseScenePosX = sceneXY.x;
+		mouseScenePosY = sceneXY.y;
+		
 		Staff.update(deltaTime);
 		FactoryState.the.update(deltaTime);
 
+		adventureCursor.update(mouseWindowPosX, mouseWindowPosY);
+
 		if (mouseWindowPosX  < scrollArea)
 			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosX) / scrollArea));
-		if (mouseWindowPosY > window.width - scrollArea)
+		if (mouseWindowPosX > window.width - scrollArea)
 			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (window.width - mouseWindowPosX)) / scrollArea));
 		Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
-		Scene.the.camx = Std.int(Math.min(Scene.the.camx, map.length * tileWidth - Std.int(width / 2)));
+		Scene.the.camx = Std.int(Math.min(Scene.the.camx, Scene.the.getWidth() - Std.int(width / 2)));
 
 		if (mouseWindowPosY < scrollArea)
 			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosY) / scrollArea));
 		if (mouseWindowPosY > window.height - scrollArea)
-			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mouseWindowPosY)) / scrollArea));
+			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (window.height - mouseWindowPosY)) / scrollArea));
 		Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
-		Scene.the.camy = Std.int(Math.min(Scene.the.camy, map[0].length * tileHeight - Std.int(height / 2)));
+		Scene.the.camy = Std.int(Math.min(Scene.the.camy, Scene.the.getHeight() - Std.int(height / 2)));
 
 		Scene.the.update();
 	}
@@ -270,6 +312,9 @@ class Main {
 		Scene.the.render(g);
 		
 		g.transformation = FastMatrix3.identity();
+
+		//BlaBox.render(g);
+		Inventory.paint(g);
 
 		g.font = font;
 		g.fontSize = 24;
@@ -309,6 +354,8 @@ class Main {
 			renderStatsBox(mouseWindowPosX, mouseWindowPosY, guyDisplays, g, false);
 		}
 
+		adventureCursor.render(g, mouseWindowPosX, mouseWindowPosY);
+
 		g.end();
 		
 		framebuffer.g2.begin();
@@ -347,13 +394,13 @@ class Main {
 	}
 
 	public static function main() {
-		System.start({title: "10Up Origins", width: width, height: height}, function (window) {
+		System.start({title: "10Up Origins", width: width, height: height + Inventory.height}, function (window) {
 			// Just loading everything is ok for small projects
 			Assets.loadEverything(function () {
 				// Avoid passing update/render directly,
 				// so replacing them via code injection works
-				init();
 				Main.window = window;
+				init();
 				window.notifyOnResize(function (width, height) { onResize(width, height); });
 				Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
 				System.notifyOnFrames(function (framebuffers) { render(framebuffers[0]); });
