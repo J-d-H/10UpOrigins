@@ -1,5 +1,6 @@
 package sprites;
 
+import manipulatables.Can10up;
 import manipulatables.ManipulatableSprite.OrderType;
 import js.html.rtc.PeerConnectionIceEventInit;
 import kha.Assets;
@@ -305,12 +306,14 @@ class RandomGuy extends UseableSprite {
 							// 10up can
 							employeeProgressTo10Up -= 1;
 							FactoryState.the.onCanProduced(true);
+							new manipulatables.Can10up(x + width / 2, y);
 						}
 						else
 						{
 							// Normal can
 							employeeProgressTo10Up += employeeProgressTo10UpPerCan;
 							FactoryState.the.onCanProduced(false);
+							new manipulatables.CanNot(x + width / 2, y);
 						}
 						employeeProgressToCan -= employeeTimeForCan;
 					}
