@@ -7,8 +7,8 @@ class FactoryState {
 	
 	public static var the(get, null): FactoryState;
 	
-	public static inline var globalTimeSpeed: Float = 1 / 30;
-	public static inline var workTimeFactor: Float = 2;
+	public static inline var globalTimeSpeed: Float = 1 / 20;
+	public static inline var workTimeFactor: Float = 1;
 	private static inline var moneyPerNormalCan = 1;
 	private static inline var moneyPer10upCan = 10;
 

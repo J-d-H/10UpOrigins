@@ -31,8 +31,6 @@ class RandomGuy extends UseableSprite {
 	private var walkRight: Animation;
 	private var statusAnimations = new Map<WorkerStatus, Animation>();
 	public var lookLeft: Bool;
-
-	private var stuff: Array<InteractiveSprite>;
 	
 	public var sleeping: Bool;
 	
@@ -52,6 +50,7 @@ class RandomGuy extends UseableSprite {
 	private static inline var healthChangeWhenWorking: Float = -(healthPerFullPause / timeToPause) * 0.5; // Lose one half Pause
 	
 	public var employeeAge: Float;
+	public var employeeExperience: Float;
 	public var employeeWage: Float;
 	public var employeeTimeForCan: Float;
 	public var employeeProgressTo10UpPerCan: Float;
@@ -97,6 +96,7 @@ class RandomGuy extends UseableSprite {
 		sleeping = false;
 		
 		employeeAge = employeeStartingAge;
+		employeeExperience = 0;
 		employeeWage = employeeStartingWage;
 		employeeTimeForCan = employeeStartingTimeForCan;
 		employeeProgressTo10UpPerCan = employeeStartingProgressTo10UpPerCan;
@@ -216,15 +216,54 @@ class RandomGuy extends UseableSprite {
 		}
 	}
 
+	@:access(kha2d.Animation)
 	public function updateState(deltaTime: Float): WorkerStatus
 	{
 		// Employee aging and stats up-/ downgrades
 		employeeAge += deltaTime * FactoryState.globalTimeSpeed;
-		// (0, 10), (20, 3), (40, 10)
-		employeeTimeForCan = 10 - 0.7 * employeeAge + 0.0175 * employeeAge * employeeAge;
-		// (0, 0), (20, 0.25), (40, 0)
-		employeeProgressTo10UpPerCan = 0 + 0.025 * employeeAge - 0.000625 * employeeAge * employeeAge;
-		employeeWage = 0.1 + 0.1 * employeeAge;
+
+		// Experience aging for up-/downgrades
+		var workFaktor: Float = 1;
+		var workHealthFaktor: Float = 1;
+		var ageHealthFaktor: Float = 1;
+		var agePauseFaktor: Float = 1;
+		switch (status)
+		{
+		case WorkerWorking:
+			employeeExperience += deltaTime * FactoryState.globalTimeSpeed;
+		case WorkerWorkingMotivated:
+			employeeExperience += 1.25 * deltaTime * FactoryState.globalTimeSpeed;
+			workFaktor *= 1.5;
+		case WorkerWorkingHard:
+			employeeExperience += 0.5 * deltaTime * FactoryState.globalTimeSpeed;
+			workHealthFaktor *= 2;
+			workFaktor *= 2;
+		case WorkerDying:
+			employeeExperience += 1000;
+		case WorkerDead | WorkerPause | WorkerSleeping:
+			employeeExperience += 0;
+		}
+		if (employeeAge > 20)
+		{
+			ageHealthFaktor = 1 + 0.1 * (employeeAge-25);
+			agePauseFaktor = 1 + 0.05 * (employeeAge-25);
+		}
+		employeeWage = 0.1 + 0.05 * employeeAge;
+
+		// (0 10), (5 5), (10 2,5)
+		if (employeeExperience < 2) employeeTimeForCan = 15 - 0.25 * employeeExperience;
+		if (employeeExperience < 4) employeeTimeForCan = 15 - 0.5 - 1 * employeeExperience;
+		if (employeeExperience < 6) employeeTimeForCan = 15 - 2.5 - 0.75 * employeeExperience;
+		if (employeeExperience < 8) employeeTimeForCan = 15 - 4 - 0.5 * employeeExperience;
+		if (employeeExperience >= 10) employeeTimeForCan = 15 - 4 - 0.25 * employeeExperience;
+		employeeTimeForCan = Math.max(employeeTimeForCan, 1);
+		if (employeeAge > 15)
+		{ 
+			// (15 *1), (25 *1,5), (55 *9)
+			employeeTimeForCan *= 1 + 0.005 * ((employeeAge * employeeAge) - (15 * 15));
+		}
+
+		employeeProgressTo10UpPerCan = 0 + 0.05 * employeeExperience;
 
 		// Pause progress
 		switch (status)
@@ -239,21 +278,23 @@ class RandomGuy extends UseableSprite {
 			}
 			case WorkerSleeping | WorkerPause:
 			{
-				employeeHealth += (healthPerFullPause / timeForPause) * deltaTime * FactoryState.workTimeFactor;
+				employeeHealth += (healthPerFullPause / (agePauseFaktor * timeForPause))* deltaTime * FactoryState.workTimeFactor;
 				// No overheal plz, we are not Wolfenstein
 				if (employeeHealth > 1)
 					employeeHealth = 1;
 
 				employeeTimeForCurrentPause += deltaTime * FactoryState.workTimeFactor;
-				if (employeeTimeForCurrentPause >= timeForPause)
+				if (employeeTimeForCurrentPause >= timeForPause * ageHealthFaktor)
 				{
 					employeeTimeForCurrentPause -= timeForPause;
-					status = employeeHealth > 0.99 ? WorkerWorkingMotivated : WorkerWorking;
+					status = employeeHealth > 0.95 ? WorkerWorkingMotivated : WorkerWorking;
+					animation.speeddiv = Std.int(Math.max(employeeTimeForCan*2, 1));
 				}
 			}
 			case WorkerWorking | WorkerWorkingMotivated | WorkerWorkingHard:
 			{
-				employeeHealth += healthChangeWhenWorking * deltaTime * FactoryState.workTimeFactor;
+				animation.speeddiv = Std.int(Math.max(employeeTimeForCan*2, 1));
+				employeeHealth += healthChangeWhenWorking * deltaTime * workHealthFaktor * ageHealthFaktor * FactoryState.workTimeFactor;
 				if (employeeHealth <= 0)
 				{
 					status = WorkerDying;
@@ -262,7 +303,10 @@ class RandomGuy extends UseableSprite {
 				}
 				else
 				{
-					employeeProgressToCan += deltaTime * FactoryState.workTimeFactor;
+					if (status == WorkerWorkingMotivated && employeeHealth < 0.9) {
+						status = WorkerWorking;
+					}
+					employeeProgressToCan += deltaTime * workFaktor * FactoryState.workTimeFactor;
 					employeeTimeToNextPause -= deltaTime * FactoryState.workTimeFactor;
 					// Needs pause
 					if (employeeTimeToNextPause <= 0)
