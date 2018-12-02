@@ -93,10 +93,10 @@ class Main {
 			windowOffsetX = Std.int((window.width - backbuffer.width/windowScale) / 2);
 			windowOffsetY = Std.int((window.height - backbuffer.height/windowScale) / 2);
 
-			trace("  Gamescreen: " + width + "/" + height);
-			trace("       Scene: " + Scene.the.getWidth() + "/" + Scene.the.getHeight());
-			trace("      Window: " + window.width + "/" + window.height);
-			trace("  backbuffer: " + backbuffer.width + "/" + backbuffer.height);
+			trace("   Gamescreen: " + width + "/" + height);
+			trace("        Scene: " + Scene.the.getWidth() + "/" + Scene.the.getHeight());
+			trace("       Window: " + window.width + "/" + window.height);
+			trace("   backbuffer: " + backbuffer.width + "/" + backbuffer.height);
 			trace(" windowScale: " + windowScale);
 			trace("windowOffset: " + windowOffsetX + "/" + windowOffsetY);
 		}
@@ -147,13 +147,6 @@ class Main {
 		updateMouse(x, y);
 
 		adventureCursor.onMouseUp(button,x,y);
-
-		/*var randomGuy: RandomGuy = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
-
-		if (randomGuy != null)
-		{
-			randomGuy.executeOrder(WorkHarder);
-		}*/
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
@@ -162,7 +155,7 @@ class Main {
 	}
 
 	private static function onMouseWheel(delta: Int): Void {
-		
+
 	}
 
 	private static function init(): Void {
@@ -171,10 +164,11 @@ class Main {
 		Random.init(Std.int(System.time * 100));
 		lastTime = Scheduler.time();
 		font = Assets.fonts.LiberationSans_Regular;
+
 		Inventory.init();
+		Inventory.pick(new RandomGuy());
 		Inventory.pick(new Injection(0,0));
-		Inventory.pick(new RandomGuy(interactiveSprites));
-		backbuffer = Image.createRenderTarget(width, height);
+
 		initLevel();
 		scene = Scene.the;
 		updateMouse(Std.int(window.width/2), Std.int(window.height/2));
