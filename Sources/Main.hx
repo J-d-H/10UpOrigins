@@ -276,7 +276,7 @@ class Main {
 		var spac: Int = 5;
 		
 		var hudDisplays : Array<StringPair> = [
-			{ key: "Time: ", value: Std.string(FactoryState.the.months) + "/" + Std.string(FactoryState.the.years) },
+			{ key: "Time: ", value: Std.string(1 + FactoryState.the.months) + "/" + Std.string(FactoryState.the.years) },
 			{ key: "Money: ", value: Std.string(FactoryState.the.money) },
 			{ key: "Cans: ", value: Std.string(FactoryState.the.cansNormal) },
 			{ key: "10ups: ", value: Std.string(FactoryState.the.cans10up) },

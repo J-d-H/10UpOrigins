@@ -44,7 +44,7 @@ class Staff
 		}
 	}
 
-	public static function calcPersonMonths(): Float
+	public static function calcWages(): Float
 	{
 		var personMonths: Float = 0;
 		for (i in 0...allguys.length)
@@ -52,7 +52,7 @@ class Staff
 			if (allguys[i].Status != WorkerDead)
 			{
 				// New hires get only paid for the partial month
-				personMonths += Math.min(1 / 12, allguys[i].employeeAge) * 12;
+				personMonths += (Math.min(1 / 12, allguys[i].employeeAge) * 12) * allguys[i].employeeWage;
 			}
 		}
 		return personMonths;

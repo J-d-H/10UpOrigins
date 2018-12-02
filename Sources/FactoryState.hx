@@ -8,10 +8,9 @@ class FactoryState {
 	public static var the(get, null): FactoryState;
 	
 	public static inline var globalTimeSpeed: Float = 1 / 30;
-	public static inline var workTimeFactor: Float = 0.5;
+	public static inline var workTimeFactor: Float = 2;
 	private static inline var moneyPerNormalCan = 1;
 	private static inline var moneyPer10upCan = 10;
-	private static inline var moneyPerPersonMonth = 1;
 
 	public var time: Float = 0;
 	public var yearTime: Float = 0;
@@ -38,7 +37,7 @@ class FactoryState {
 		if (yearTime >= 1 / 12)
 		{
 			yearTime -= 1 / 12;
-			money -= Math.round(moneyPerPersonMonth * Staff.calcPersonMonths());
+			money -= Math.round(Staff.calcWages());
 		}
 		months = Math.floor(time * 12) % 12;
 		years = Math.floor(time);

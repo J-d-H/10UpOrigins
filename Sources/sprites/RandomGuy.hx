@@ -42,6 +42,8 @@ class RandomGuy extends UseableSprite {
 	private var zzzzzAnim: Animation;
 	
 	private static inline var employeeStartingAge: Float = 0;
+	private static inline var employeeStartingWage: Float = 0.01;
+	private static inline var employeeWageIncreaseFactor: Float = 0.1;
 	private static inline var employeeStartingTimeForCan: Float = 10;
 	private static inline var employeeStartingProgressTo10UpPerCan: Float = 0;
 	private static inline var timeToPause: Float = 20;
@@ -50,6 +52,7 @@ class RandomGuy extends UseableSprite {
 	private static inline var healthChangeWhenWorking: Float = -(healthPerFullPause / timeToPause) * 0.5; // Lose one half Pause
 	
 	public var employeeAge: Float;
+	public var employeeWage: Float;
 	public var employeeTimeForCan: Float;
 	public var employeeProgressTo10UpPerCan: Float;
 	public var employeeProgressToCan: Float;
@@ -125,6 +128,7 @@ class RandomGuy extends UseableSprite {
 		sleeping = false;
 		
 		employeeAge = employeeStartingAge;
+		employeeWage = employeeStartingWage;
 		employeeTimeForCan = employeeStartingTimeForCan;
 		employeeProgressTo10UpPerCan = employeeStartingProgressTo10UpPerCan;
 		employeeProgressToCan = 0;
@@ -260,6 +264,7 @@ class RandomGuy extends UseableSprite {
 		employeeTimeForCan = 10 - 0.7 * employeeAge + 0.0175 * employeeAge * employeeAge;
 		// (0, 0), (20, 0.25), (40, 0)
 		employeeProgressTo10UpPerCan = 0 + 0.025 * employeeAge - 0.000625 * employeeAge * employeeAge;
+		employeeWage = 0.1 + 0.1 * employeeAge;
 
 		// Pause progress
 		switch (Status)
