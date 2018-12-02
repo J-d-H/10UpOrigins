@@ -49,7 +49,17 @@ class Main {
 	}
 
 	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
-		
+		var worldX = x + Scene.the.screenOffsetX;
+		var worldY = y + Scene.the.screenOffsetY;
+		var guysBelowPoint = Scene.the.getHeroesBelowPoint(x, y);
+		for (guy in guysBelowPoint)
+		{
+			if (Std.is(guy, RandomGuy))
+			{
+				var randomGuy : RandomGuy = cast guy;
+				randomGuy.executeOrder(WorkHarder);
+			}
+		}
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
