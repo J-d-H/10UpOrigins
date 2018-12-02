@@ -28,8 +28,6 @@ class Staff
 
 		Scene.the.addHero(newGuy);
 		
-		newGuy.status = WorkerWorking;
-		
 		return newGuy;
 	}
 

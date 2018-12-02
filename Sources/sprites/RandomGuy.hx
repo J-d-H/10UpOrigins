@@ -111,7 +111,7 @@ class RandomGuy extends UseableSprite {
 		employeeCansNot = 0;
 		employeeCans10up = 0;
 
-		status = WorkerPause;
+		status = WorkerWorkingMotivated;
 
 		if (!customlook) {
 			switch (name.substr(-1))

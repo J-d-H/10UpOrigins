@@ -11,7 +11,7 @@ class Can extends UseableSprite
 
 	public function new(name: String, image: Image, px: Float, py: Float)
 	{
-		super(name, image, px, py);
+		super(name, image, px - image.width / 2, py);
 		livetimeInFramesRemaining = livetimeInFrames;
 		Scene.the.addOther(this);
 	}
