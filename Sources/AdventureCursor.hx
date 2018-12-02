@@ -1,5 +1,6 @@
 package;
 
+import kha.input.Mouse;
 import manipulatables.ManipulatableSprite;
 //import kha.AnimatedImageCursor;
 import kha2d.Animation;
@@ -57,15 +58,19 @@ class AdventureCursor implements Cursor {
 	public var forcedTooltip : String = null;
 	
 	public function new() {
+		cursors[Take] = new ImageCursor(Assets.images.handcursor, 6, 9);
+		cursors[InventoryItem] = new ImageCursor(Assets.images.handcursor, 6, 9);
+		cursors[WontWork] = new ImageCursor(Assets.images.pizza_pixel, 5, 5); // TODO: cursor
 		cursors[WorkHarder] = new ImageCursor(Assets.images.spritze2, 16, 16);
 		currentCursor = null;
-		//Mouse.forceSystemCursor(true);
+		Mouse.get().showSystemCursor();
 		font = Assets.fonts.LiberationSans_Regular;
 		fontSize = 14;
 	}
 	
 	public function render(g: Graphics, x: Int, y: Int): Void {
 		if (currentCursor != null) {
+			g.color = Color.White;
 			currentCursor.render(g, x, y);
 			
 			if (forcedTooltip != null) {
@@ -84,6 +89,27 @@ class AdventureCursor implements Cursor {
 		g.color = Color.White;
 		g.drawString(tip, x, y);
 	}
+
+	public function onMouseDown(button: Int, x : Int, y : Int): Void
+	{
+	}
+
+	public function onMouseUp(button: Int, x : Int, y : Int): Void
+	{
+		if (button > 0)
+		{
+			// deselect
+			Inventory.select(Inventory.getSelectedItem());
+			update(x, y);
+		}
+		else
+		{
+			if (hoveredObject != null)
+			{
+				hoveredObject.executeOrder(hoveredType);
+			}
+		}
+	}
 	
 	public function update(x : Int, y : Int) {
 		var toolTipTop : Bool = false;
@@ -97,9 +123,8 @@ class AdventureCursor implements Cursor {
 			toolTipTop = true;
 			toolTip = null;
 		} else {
-			var worldX = x + Scene.the.screenOffsetX;
-			var worldY = y + Scene.the.screenOffsetY;
-			for (obj in Scene.the.getSpritesBelowPoint(worldX, worldY)) {
+			var sceneXY = Main.getSceneXY(x, y);
+			for (obj in Scene.the.getSpritesBelowPoint(sceneXY.x, sceneXY.y)) {
 				if (Std.is(obj, ManipulatableSprite)) {
 					hoveredObject = cast obj;
 					hoveredType = hoveredObject.getOrder(Inventory.getSelectedItem());
@@ -122,10 +147,10 @@ class AdventureCursor implements Cursor {
 		
 		if (cursors.exists(hoveredType)) {
 			currentCursor = cursors[hoveredType];
-			//Mouse.forceSystemCursor(false);
+			Mouse.get().hideSystemCursor();
 			currentCursor.update(x, y);
 		} else {
-			//Mouse.forceSystemCursor(true);
+			Mouse.get().showSystemCursor();
 			currentCursor = null;
 		}
 		if (toolTipTop) {
