@@ -12,7 +12,8 @@ class Staff
 	public static function addGuy(slot:Int = -1): RandomGuy
 	{
 		var newGuy = new RandomGuy();
-		allguys.push(newGuy);
+		if (slot >= 0) allguys[slot] = newGuy;
+		else allguys.push(newGuy);
 		
 		/*for (npcSpawn in Main.npcSpawns)
 		{
@@ -38,6 +39,8 @@ class Staff
 		{
 			if (allguys[i].updateState(deltaTime) == WorkerDying)
 			{
+				// now he is gone...
+				allguys[i].status = WorkerDead;
 				// Hire new employe
 				addGuy(i);
 			}
