@@ -1,5 +1,7 @@
 package;
 
+import kha.Canvas;
+import kha.Window;
 import kha.math.Random;
 import sprites.*;
 import hr.Staff;
@@ -22,8 +24,8 @@ import kha2d.Tile;
 typedef StringPair = { key : String, value : String }
 
 class Main {
-	public static inline var width: Int = 1024;
-	public static inline var height: Int = 768;
+	public static var width(default, null): Int = 1024;
+	public static var height(default, null): Int = 768;
 	public static inline var scaling: Int = 1;
 	public static inline var tileWidth: Int = 32;
 	public static inline var tileHeight: Int = 32;
@@ -41,14 +43,61 @@ class Main {
 	public static var interactiveSprites: Array<InteractiveSprite>;
 	private static var guyBelowMouse: RandomGuy = null;
 
-	private static var mousePosX: Int = Std.int(width / 2);
-	private static var mousePosY: Int = Std.int(height / 2);
 
-	private static function getGuyBelowCoords(x: Int, y: Int): RandomGuy
+	public static var lastWindowWidth: Int;
+	public static var lastWindowHeigth: Int;
+	public static var mouseWindowPosX(default, null): Int;
+	public static var mouseWindowPosY(default, null): Int;
+	public static var mouseScenePosX(default, null): Int;
+	public static var mouseScenePosY(default, null): Int;
+	private static var window: Window;
+	private static var windowScale: Float;
+	private static var windowOffsetX: Int;
+	private static var windowOffsetY: Int;
+	private static var scene: Scene;
+
+	private static function updateMouse(x: Int, y: Int): Void
 	{
-		var worldX = x + Scene.the.screenOffsetX;
-		var worldY = y + Scene.the.screenOffsetY;
-		var guysBelowPoint = Scene.the.getHeroesBelowPoint(x, y);
+		var updatedWindow = false;
+		if (lastWindowWidth != window.width || lastWindowHeigth != window.height)
+		{
+			updatedWindow = true;
+			lastWindowWidth = window.width;
+			lastWindowHeigth = window.height;
+			width = Std.int(Math.min(Scene.the.getWidth(), window.width));
+			height = Std.int(Math.min(Scene.the.getHeight(), window.height));
+			// TODO: fix backbuffer
+			var scaleX = width/window.width;
+			var scaleY = height/window.height;
+			if (scaleX < 1)
+			{
+				windowScale = Math.max(scaleX, scaleY);
+			}
+			else
+			{
+				windowScale = Math.min(scaleX, scaleY);
+			}
+			windowOffsetX = Std.int((window.width - width/windowScale) / 2);
+			windowOffsetY = Std.int((window.height - height/windowScale) / 2);
+
+			trace("  Gamescreen: " + width + "/" + height);
+			trace("       Scene: " + Scene.the.getWidth() + "/" + Scene.the.getHeight());
+			trace("      Window: " + window.width + "/" + window.height);
+			trace("  backbuffer: " + backbuffer.width + "/" + backbuffer.height);
+			trace(" windowScale: " + windowScale);
+			trace("windowOffset: " + windowOffsetX + "/" + windowOffsetY);
+		}
+		
+		mouseWindowPosX = x;
+		mouseWindowPosY = y;
+
+		mouseScenePosX = Std.int((x - windowOffsetX) * windowScale) + Scene.the.screenOffsetX;
+		mouseScenePosY = Std.int((y - windowOffsetY) * windowScale) + Scene.the.screenOffsetY;
+	}
+
+	private static function getGuyBelowCoords(sceneX: Int, sceneY: Int): RandomGuy
+	{
+		var guysBelowPoint = Scene.the.getHeroesBelowPoint(sceneX, sceneY);
 		for (guy in guysBelowPoint)
 		{
 			if (Std.is(guy, RandomGuy))
@@ -64,8 +113,13 @@ class Main {
 		
 	}
 
-	private static function onMouseUp(button: Int, x: Int, y: Int): Void {
-		var randomGuy: RandomGuy = getGuyBelowCoords(x, y);
+	private static function onMouseUp(button: Int, x: Int, y: Int): Void
+	{
+		updateMouse(x, y);
+		trace("window: " + x + "/" + y);
+		trace("scene: " + mouseScenePosX + "/" + mouseScenePosY);
+
+		var randomGuy: RandomGuy = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
 
 		if (randomGuy != null)
 		{
@@ -74,9 +128,8 @@ class Main {
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
-		mousePosX = x;
-        mousePosY = y;
-		guyBelowMouse = getGuyBelowCoords(x, y);
+		updateMouse(x, y);
+		guyBelowMouse = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
 	}
 
 	private static function onMouseWheel(delta: Int): Void {
@@ -91,6 +144,7 @@ class Main {
 		font = Assets.fonts.LiberationSans_Regular;
 		backbuffer = Image.createRenderTarget(width * scaling, height * scaling);
 		initLevel();
+		scene = Scene.the;
 		Scene.the.camx = Std.int(width / 2);
 		
 		for (i in 0...npcSpawns.length)
@@ -192,17 +246,18 @@ class Main {
 		
 		Staff.update(deltaTime);
 
-		if (mousePosX  < scrollArea)
-			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mousePosX) / scrollArea));
-		if (mousePosX > width - scrollArea)
-			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (width - mousePosX)) / scrollArea));
+
+		if (mouseWindowPosX  < scrollArea)
+			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosX) / scrollArea));
+		if (mouseWindowPosY > window.width - scrollArea)
+			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (window.width - mouseWindowPosX)) / scrollArea));
 		Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
 		Scene.the.camx = Std.int(Math.min(Scene.the.camx, map.length * tileWidth - Std.int(width / 2)));
 
-		if (mousePosY < scrollArea)
-			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mousePosY) / scrollArea));
-		if (mousePosY > height - scrollArea)
-			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mousePosY)) / scrollArea));
+		if (mouseWindowPosY < scrollArea)
+			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosY) / scrollArea));
+		if (mouseWindowPosY > window.height - scrollArea)
+			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (height - mouseWindowPosY)) / scrollArea));
 		Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
 		Scene.the.camy = Std.int(Math.min(Scene.the.camy, map[0].length * tileHeight - Std.int(height / 2)));
 
@@ -244,12 +299,12 @@ class Main {
 		{
 			var guyDisplays : Array<StringPair> = [
 				{ key: guyBelowMouse.name, value: "" },
-				{ key: "Age: ", value: Std.string(Math.ceil(guyBelowMouse.employeeAge + 18)) },
+				{ key: "Age: ", value: Std.string(Math.floor(guyBelowMouse.employeeAge + 18)) },
 				{ key: "Health: ", value: Std.string(Math.round(guyBelowMouse.employeeHealth * 100)) + "%" },
 				{ key: "Speed: ", value: Std.string(Math.round(guyBelowMouse.employeeTimeForCan * 100) / 100) },
 				{ key: "Quality: ", value: Std.string(Math.round(guyBelowMouse.employeeProgressTo10UpPerCan * 100) / 100) }
 			];
-			renderStatsBox(mousePosX, mousePosY, guyDisplays, g, false);
+			renderStatsBox(mouseWindowPosX, mouseWindowPosY, guyDisplays, g, false);
 		}
 
 		g.end();
@@ -284,13 +339,20 @@ class Main {
 		}
 	}
 
+	public static function onResize(width: Int, height: Int): Void
+	{
+		trace("RESIZE: " + width + "/" + height);
+	}
+
 	public static function main() {
-		System.start({title: "10Up Origins", width: width, height: height}, function (_) {
+		System.start({title: "10Up Origins", width: width, height: height}, function (window) {
 			// Just loading everything is ok for small projects
 			Assets.loadEverything(function () {
 				// Avoid passing update/render directly,
 				// so replacing them via code injection works
 				init();
+				Main.window = window;
+				window.notifyOnResize(function (width, height) { onResize(width, height); });
 				Scheduler.addTimeTask(function () { update(); }, 0, 1 / 60);
 				System.notifyOnFrames(function (framebuffers) { render(framebuffers[0]); });
 			});
