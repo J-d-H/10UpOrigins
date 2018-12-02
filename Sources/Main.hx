@@ -74,6 +74,8 @@ class Main {
 	}
 
 	private static function onMouseMove(x: Int, y: Int, moveX: Int, moveY: Int): Void {
+		mousePosX = x;
+        mousePosY = y;
 		guyBelowMouse = getGuyBelowCoords(x, y);
 	}
 
@@ -214,6 +216,10 @@ class Main {
 		Scene.the.render(g);
 		
 		g.transformation = FastMatrix3.identity();
+
+		g.font = font;
+		g.fontSize = 24;
+		var spac: Int = 5;
 		
 		var hudDisplays : Array<StringPair> = [
 			{ key: "Money: ", value: Std.string(FactoryState.the.money) },
@@ -221,26 +227,7 @@ class Main {
 			{ key: "10ups: ", value: Std.string(FactoryState.the.cans10up) },
 			{ key: "Deaths: ", value: Std.string(FactoryState.the.casualties) }
 		];
-
-		g.font = font;
-		g.fontSize = 24;
-		var stringWidth: Float = 0;
-		for (i in 0...hudDisplays.length)
-			stringWidth = Math.max(g.font.width(g.fontSize, hudDisplays[i].key + hudDisplays[i].value), stringWidth);
-		var stringHeight: Float = g.font.height(g.fontSize);
-
-		var pad: Int = 5;
-		var spac: Int = 5;
-		g.color = Color.Black;
-		g.fillRect(width - (stringWidth + 2 * pad + spac), spac, stringWidth + 2 * pad, stringHeight * hudDisplays.length + pad * (hudDisplays.length + 1));
-		g.color = Color.White;
-		var yOffset: Float = pad + spac;
-		for (i in 0...hudDisplays.length)
-		{
-			g.drawString(hudDisplays[i].key, width - (stringWidth + pad + spac), yOffset);
-			g.drawString(hudDisplays[i].value, width - (g.font.width(g.fontSize, hudDisplays[i].value) + pad + spac), yOffset);
-			yOffset += pad + stringHeight;
-		}
+		renderStatsBox(width - spac, spac, hudDisplays, g, true);
 
 		// Debug only
 		#if debug
@@ -255,7 +242,14 @@ class Main {
 		
 		if (guyBelowMouse != null)
 		{
-			g.drawString(guyBelowMouse.name, 10, 130);
+			var guyDisplays : Array<StringPair> = [
+				{ key: guyBelowMouse.name, value: "" },
+				{ key: "Age: ", value: Std.string(Math.ceil(guyBelowMouse.employeeAge + 18)) },
+				{ key: "Health: ", value: Std.string(Math.round(guyBelowMouse.employeeHealth * 100)) + "%" },
+				{ key: "Speed: ", value: Std.string(Math.round(guyBelowMouse.employeeTimeForCan * 100) / 100) },
+				{ key: "Quality: ", value: Std.string(Math.round(guyBelowMouse.employeeProgressTo10UpPerCan * 100) / 100) }
+			];
+			renderStatsBox(mousePosX, mousePosY, guyDisplays, g, false);
 		}
 
 		g.end();
@@ -263,6 +257,31 @@ class Main {
 		framebuffer.g2.begin();
 		Scaler.scale(backbuffer, framebuffer, System.screenRotation);
 		framebuffer.g2.end();
+	}
+
+	private static function renderStatsBox(x: Int, y: Int, stats: Array<StringPair>, g: kha.graphics2.Graphics, right: Bool)
+	{
+		var stringWidth: Float = 0;
+		for (i in 0...stats.length)
+			stringWidth = Math.max(g.font.width(g.fontSize, stats[i].key + stats[i].value), stringWidth);
+		var stringHeight: Float = g.font.height(g.fontSize);
+
+		var pad: Int = 5;
+		var xOffset: Float = right ? x - (stringWidth + 2 * pad) : x;
+		var yOffset: Float = y;
+
+		g.color = Color.Black;
+		g.fillRect(xOffset, yOffset, stringWidth + 2 * pad, stringHeight * stats.length + pad * (stats.length + 1));
+		
+		g.color = Color.White;
+		xOffset += pad;
+		yOffset += pad;
+		for (i in 0...stats.length)
+		{
+			g.drawString(stats[i].key, xOffset, yOffset);
+			g.drawString(stats[i].value, xOffset + stringWidth - g.font.width(g.fontSize, stats[i].value), yOffset);
+			yOffset += pad + stringHeight;
+		}
 	}
 
 	public static function main() {
