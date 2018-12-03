@@ -6,6 +6,7 @@ import manipulatables.ManipulatableItem;
 import hr.RandomGuy;
 import manipulatables.UseableSprite;
 import manipulatables.ManipulatableItem.OrderType;
+import sprites.Blood;
 
 class DiscreteGuy extends RandomGuy
 {
@@ -292,6 +293,8 @@ class DiscreteGuy extends RandomGuy
 					status = WorkerWorking;
 				}
 				employeeHealth -= 0.005;
+				for (i in 0...20)
+					kha2d.Scene.the.addProjectile(new Blood(x + width / 2, y + height / 3));
 			} 
 			else 
 			{
