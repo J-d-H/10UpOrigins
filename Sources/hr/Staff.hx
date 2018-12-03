@@ -44,14 +44,14 @@ class Staff
 			if (allguys[i].status != WorkerDead)
 			{
 				// New hires get only paid for the partial month
-				personMonths += (Math.min(1 / 12, allguys[i].employeeAge) * 12) * allguys[i].employeeWage;
+				personMonths += Math.min(1, allguys[i].employeeAge) * allguys[i].employeeWage;
 			}
 		}
 		for (i in 0...workplaces.length)
 		{
 			if (workplaces[i].visible) 
 			{
-				personMonths += FactoryState.workplaceCostsPerYear / 12;
+				personMonths += FactoryState.workplaceCostsPerYear;
 			}
 		}
 		return personMonths;
