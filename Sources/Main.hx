@@ -29,7 +29,7 @@ class Main {
 	private static inline var minWidth: Int = 600;
 	private static inline var minHeight: Int = 200;
 	public static var width(default, null): Int = 1024;
-	public static var height(default, null): Int = 768;
+	public static var height(default, null): Int = 736;
 	public static inline var tileWidth: Int = 32;
 	public static inline var tileHeight: Int = 32;
 	private static inline var scrollArea: Int = 32;
@@ -46,10 +46,12 @@ class Main {
 	public static var interactiveSprites: Array<InteractiveSprite>;
 	private static var guyBelowMouse: RandomGuy = null;
 
+	private static var lastFramebufferWidth: Int = width;
+	private static var lastFramebufferHeight: Int = height + Inventory.height;
 	public static var lastWindowWidth: Int;
 	public static var lastWindowHeigth: Int;
-	public static var mouseWindowPosX(default, null): Int;
-	public static var mouseWindowPosY(default, null): Int;
+	public static var mouseScreenPosX(default, null): Int;
+	public static var mouseScreenPosY(default, null): Int;
 	public static var mouseScenePosX(default, null): Int;
 	public static var mouseScenePosY(default, null): Int;
 	private static var window: Window;
@@ -68,57 +70,59 @@ class Main {
 			updatedWindow = true;
 			lastWindowWidth = window.width;
 			lastWindowHeigth = window.height;
-			width = Std.int(Math.min(Scene.the.getWidth(), window.width));
-			height = Std.int(Math.min(Scene.the.getHeight(), window.height));
+			width = Std.int(Math.min(Scene.the.getWidth(), lastFramebufferWidth));
+			height = Std.int(Math.min(Scene.the.getHeight(), lastFramebufferHeight));
 			width = Std.int(Math.max(minWidth, width));
 			height = Std.int(Math.max(minHeight, height));
 
-			backbuffer = Image.createRenderTarget(width, height + Inventory.height);
+			backbuffer = Image.createRenderTarget(width, height);
 			Scene.the.setSize(width, height);
 			
 			Inventory.y = height;
 
+			backbuffer = Image.createRenderTarget(width, height + Inventory.height);
+
 			var scaleX = backbuffer.width/window.width;
 			var scaleY = backbuffer.height/window.height;
-			if (scaleX < 1)
+			if (scaleX < scaleY)
 			{
-				windowScale = Math.min(scaleX, scaleY);
+				windowScale = scaleY;
+				windowOffsetX = Std.int(scaleX * (backbuffer.width - lastFramebufferWidth) / 2);
+				windowOffsetY = 0;
 			}
 			else
 			{
-				windowScale = Math.max(scaleX, scaleY);
+				windowScale = scaleX;
+				windowOffsetX = 0;
+				windowOffsetY = Std.int(scaleY * (backbuffer.height - lastFramebufferHeight) / 2);
 			}
-			windowOffsetX = Std.int((window.width - backbuffer.width/windowScale) / 2);
-			windowOffsetY = Std.int((window.height - backbuffer.height/windowScale) / 2);
 
 			trace("   Gamescreen: " + width + "/" + height);
+			trace("  Framebuffer: " + lastFramebufferWidth + "/" + lastFramebufferHeight);
 			trace("        Scene: " + Scene.the.getWidth() + "/" + Scene.the.getHeight());
 			trace("       Window: " + window.width + "/" + window.height);
 			trace("   backbuffer: " + backbuffer.width + "/" + backbuffer.height);
-			trace(" windowScale: " + windowScale);
-			trace("windowOffset: " + windowOffsetX + "/" + windowOffsetY);
+			trace("  windowScale: " + windowScale);
+			trace(" windowOffset: " + windowOffsetX + "/" + windowOffsetY);
 		}
 		
-		mouseWindowPosX = x;
-		mouseWindowPosY = y;
+		var screenXY = getScreenXY(x, y);
+		mouseScreenPosX = screenXY.x;
+		mouseScreenPosY = screenXY.y;
 
-		if (mouseWindowPosY < width)
-		{
-			var sceneXY = getSceneXY(x, y);
-			mouseScenePosX = sceneXY.x;
-			mouseScenePosY = sceneXY.y;
-		}
-		else
-		{
-			mouseScenePosX = -1000;
-			mouseScenePosY = -1000;
-		}
+		if (0 <= mouseScreenPosX && mouseScreenPosX < width)
+			mouseScenePosX = mouseScreenPosX + Scene.the.screenOffsetX;
+		else mouseScenePosX = -1000;
+		
+		if (0 <= mouseScreenPosY && mouseScreenPosY < height)
+			mouseScenePosY = mouseScreenPosY + Scene.the.screenOffsetY;
+		else mouseScenePosY = -1000;
 	}
 
-	public static function getSceneXY(x: Int, y: Int): Vector2i
+	public static function getScreenXY(x: Int, y: Int): Vector2i
 	{
-		return new Vector2i(Std.int((x - windowOffsetX) * windowScale) + Scene.the.screenOffsetX,
-		                    Std.int((y - windowOffsetY) * windowScale) + Scene.the.screenOffsetY);
+		return new Vector2i(Std.int((x + windowOffsetX) * windowScale),
+		                    Std.int((y + windowOffsetY) * windowScale));
 	}
 
 	private static function getGuyBelowCoords(sceneX: Int, sceneY: Int): RandomGuy
@@ -153,7 +157,7 @@ class Main {
 		updateMouse(x, y);
 		guyBelowMouse = getGuyBelowCoords(mouseScenePosX, mouseScenePosY);
 	}
-
+	
 	private static function onMouseWheel(delta: Int): Void {
 
 	}
@@ -175,13 +179,13 @@ class Main {
 		Scene.the.camx = Std.int(width / 2);
 		
 		adventureCursor = new AdventureCursor();
-		
+
 		for (i in 0...npcSpawns.length)
 		{
 			Staff.addGuy();
 		}
 	}
-	
+
 	public static function initLevel(): Void {
 		tileColissions = new Array<Tile>();
 		for (i in 0...1024) {
@@ -286,26 +290,22 @@ class Main {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
 		
-		var sceneXY = getSceneXY(mouseWindowPosX, mouseWindowPosY);
-		mouseScenePosX = sceneXY.x;
-		mouseScenePosY = sceneXY.y;
-		
 		Staff.update(deltaTime);
 		FactoryState.the.update(deltaTime);
 
-		adventureCursor.update(mouseWindowPosX, mouseWindowPosY);
+		adventureCursor.update(mouseScreenPosX, mouseScreenPosY);
 
-		if (mouseWindowPosX  < scrollArea)
-			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosX) / scrollArea));
-		if (mouseWindowPosX > window.width - scrollArea)
-			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (window.width - mouseWindowPosX)) / scrollArea));
+		if (mouseScenePosX  < scrollArea)
+			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseScenePosX) / scrollArea));
+		if (mouseScenePosX > window.width - scrollArea)
+			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (window.width - mouseScenePosX)) / scrollArea));
 		Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
 		Scene.the.camx = Std.int(Math.min(Scene.the.camx, Scene.the.getWidth() - Std.int(width / 2)));
 
-		if (mouseWindowPosY < scrollArea)
-			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosY) / scrollArea));
-		if (mouseWindowPosY > window.height - scrollArea)
-			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (window.height - mouseWindowPosY)) / scrollArea));
+		if (mouseScenePosY < scrollArea)
+			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mouseScenePosY) / scrollArea));
+		if (mouseScenePosY > window.height - scrollArea)
+			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (window.height - mouseScenePosY)) / scrollArea));
 		Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
 		Scene.the.camy = Std.int(Math.min(Scene.the.camy, Scene.the.getHeight() - Std.int(height / 2)));
 
@@ -313,6 +313,9 @@ class Main {
 	}
 
 	static function render(framebuffer: Framebuffer): Void {
+		lastFramebufferHeight = framebuffer.height;
+		lastFramebufferWidth = framebuffer.width;
+
 		var g = backbuffer.g2;
 		g.begin();
 		
@@ -358,10 +361,19 @@ class Main {
 				{ key: "Cans: ", value: Std.string(Math.floor(guyBelowMouse.employeeCansNot)) },
 				{ key: "10ups: ", value: Std.string(Math.floor(guyBelowMouse.employeeCans10up)) }
 			];
-			renderStatsBox(mouseWindowPosX, mouseWindowPosY, guyDisplays, g, false);
+			renderStatsBox(mouseScreenPosX, mouseScreenPosY, guyDisplays, g, false);
 		}
 
-		adventureCursor.render(g, mouseWindowPosX, mouseWindowPosY);
+		#if false
+		// Mouse debug
+		var guyDisplays : Array<StringPair> = [
+			{ key: "x/y", value: mouseScreenPosX + "/" + mouseScreenPosY },
+			{ key: "Scene X/Y", value: mouseScenePosX + "/" + mouseScenePosY }
+		];
+		renderStatsBox(mouseScreenPosX, mouseScreenPosY, guyDisplays, g, false);
+		#end
+
+		adventureCursor.render(g, mouseScreenPosX, mouseScreenPosY);
 
 		g.end();
 		
