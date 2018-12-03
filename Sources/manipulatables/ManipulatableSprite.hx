@@ -7,6 +7,8 @@ enum OrderType {
 	InventoryItem;
 	ToolTip;
 	WorkHarder;
+	HireWorker;
+	BuildWorkplace;
 }
 
 interface ManipulatableSprite {

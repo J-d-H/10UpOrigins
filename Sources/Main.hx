@@ -1,5 +1,8 @@
 package;
 
+import hr.RandomGuy;
+import hr.Workplace;
+import hr.DiscreteGuy;
 import kha.math.Vector2i;
 import manipulatables.Injection;
 import kha.Window;
@@ -148,6 +151,7 @@ class Main {
 
 	private static function onMouseUp(button: Int, x: Int, y: Int): Void
 	{
+		trace("x,y=" + x + "/" + y);
 		updateMouse(x, y);
 
 		adventureCursor.onMouseUp(button,x,y);
@@ -170,7 +174,10 @@ class Main {
 		font = Assets.fonts.LiberationSans_Regular;
 
 		Inventory.init();
-		Inventory.pick(new RandomGuy());
+		Inventory.pick(new Workplace(-1));
+		Inventory.pick(new DiscreteGuy(0.1, 0, 0));
+		Inventory.pick(new DiscreteGuy(0.2, 1, 2));
+		Inventory.pick(new DiscreteGuy(0.3, 3, 5));
 		Inventory.pick(new Injection(0,0));
 
 		initLevel();
@@ -180,10 +187,10 @@ class Main {
 		
 		adventureCursor = new AdventureCursor();
 
-		for (i in 0...npcSpawns.length)
-		{
-			Staff.addGuy();
-		}
+		var npcSlotsPerRow = Std.int(npcSpawns.length/4);
+		var slot = Std.int(npcSpawns.length - Std.int(0.5 * npcSlotsPerRow));
+		Staff.workplaces[slot].visible = true;
+		Staff.hireGuy(slot, new DiscreteGuy(0.1, 0, 0));
 	}
 
 	public static function initLevel(): Void {
@@ -252,6 +259,9 @@ class Main {
 				bookshelves.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
 			case 5:
 				npcSpawns.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
+				var workplace = new Workplace(i);
+				Staff.workplaces[i] = workplace;
+				Scene.the.addOther(workplace);
 			case 6:
 				//npcSpawns.push(new Vector2(sprites[i * 3 + 1], sprites[i * 3 + 2]));
 				var coffee : Coffee = new Coffee(sprites[i * 3 + 1], sprites[i * 3 + 2]);

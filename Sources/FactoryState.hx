@@ -12,6 +12,9 @@ class FactoryState {
 	private static inline var moneyPerNormalCan = 1;
 	private static inline var moneyPer10upCan = 10;
 
+	public static inline var workplaceInitialCosts = 10;
+	public static inline var workplaceCostsPerYear = 1;
+
 	public var time: Float = 0;
 	public var yearTime: Float = 0;
 	public var months: Int = 0;

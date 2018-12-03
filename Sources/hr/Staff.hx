@@ -2,45 +2,36 @@ package hr;
 
 import kha.math.Vector2;
 import kha2d.Scene;
-import sprites.RandomGuy;
+import hr.RandomGuy;
+import hr.Workplace;
 
 @:access(Main)
 class Staff
 {
 	public static var allguys = new Array<RandomGuy>();
+	public static var workplaces = new Array<Workplace>();
 	
-	public static function addGuy(slot:Int = -1): RandomGuy
+	public static function hireGuy(slot:Int, newGuy: RandomGuy): Void
 	{
-		var newGuy = new RandomGuy();
-		if (slot >= 0) allguys[slot] = newGuy;
-		else allguys.push(newGuy);
-		
-		/*for (npcSpawn in Main.npcSpawns)
-		{
-			
-		}*/
-		
-		if (slot < 0)
-		{
-			slot = allguys.length-1;
-		}
-		newGuy.setPosition(Main.npcSpawns[slot]);
+		var workplace = workplaces[slot];
+		if (!workplace.visible) throw "Das wird niemals passieren.";
+		if (workplace.worker != null) throw "Das wird niemals passieren.";
 
+		workplace.worker = newGuy;
+		newGuy.workplace = workplace;
+		allguys.push(newGuy);
+
+		newGuy.setPosition(Main.npcSpawns[slot]);
 		Scene.the.addHero(newGuy);
-		
-		return newGuy;
 	}
 
 	public static function update(deltaTime:Float) 
 	{
 		for (i in 0...allguys.length)
 		{
-			if (allguys[i].updateState(deltaTime) == WorkerDying)
+			switch (allguys[i].updateState(deltaTime))
 			{
-				// now he is gone...
-				allguys[i].status = WorkerDead;
-				// Hire new employe
-				addGuy(i);
+				default:
 			}
 		}
 	}
@@ -54,6 +45,13 @@ class Staff
 			{
 				// New hires get only paid for the partial month
 				personMonths += (Math.min(1 / 12, allguys[i].employeeAge) * 12) * allguys[i].employeeWage;
+			}
+		}
+		for (i in 0...workplaces.length)
+		{
+			if (workplaces[i].visible) 
+			{
+				personMonths += FactoryState.workplaceCostsPerYear;
 			}
 		}
 		return personMonths;

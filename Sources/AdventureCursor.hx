@@ -1,5 +1,6 @@
 package;
 
+import hr.Workplace;
 import kha.input.Mouse;
 import manipulatables.ManipulatableSprite;
 //import kha.AnimatedImageCursor;
@@ -62,6 +63,8 @@ class AdventureCursor implements Cursor {
 		cursors[InventoryItem] = new ImageCursor(Assets.images.handcursor, 6, 9);
 		cursors[WontWork] = new ImageCursor(Assets.images.pizza_pixel, 5, 5); // TODO: cursor
 		cursors[WorkHarder] = new ImageCursor(Assets.images.spritze2, 32, 16);
+		cursors[BuildWorkplace] = new ImageCursor(Assets.images.coffee, 16, 32, 32, 64);
+		cursors[HireWorker] = new ImageCursor(Assets.images.nullachtsechzehnmann, 16, 32, 32, 64);
 		currentCursor = null;
 		Mouse.get().showSystemCursor();
 		font = Assets.fonts.LiberationSans_Regular;
@@ -111,8 +114,10 @@ class AdventureCursor implements Cursor {
 		}
 	}
 	
-	public function update(x : Int, y : Int) {
+	public function update(x : Int, y : Int): Void
+	{
 		var toolTipTop : Bool = false;
+		var inventoryItem = Inventory.getSelectedItem();
 		hoveredType = OrderType.Nothing;
 		hoveredObject = Inventory.getItemBelowPoint(x, y);
 		if (hoveredObject != null) {
@@ -123,25 +128,28 @@ class AdventureCursor implements Cursor {
 			toolTipTop = true;
 			toolTip = null;
 		} else {
-			var sceneXY = Main.getSceneXY(x, y);
-			for (obj in Scene.the.getSpritesBelowPoint(sceneXY.x, sceneXY.y)) {
+			for (obj in Scene.the.getSpritesBelowPoint(x + Scene.the.screenOffsetX, y + Scene.the.screenOffsetY)) {
 				if (Std.is(obj, ManipulatableSprite)) {
 					hoveredObject = cast obj;
-					hoveredType = hoveredObject.getOrder(Inventory.getSelectedItem());
+					hoveredType = hoveredObject.getOrder(inventoryItem);
 					if (hoveredType == OrderType.Nothing) {
 						hoveredObject = null;
 						toolTip = null;
 					} else {
 						if (hoveredType == OrderType.ToolTip) {
 							toolTip = Localization.getText(hoveredObject.name);
-						} else if (Inventory.getSelectedItem() != null) {
-							toolTip = Localization.getText(Inventory.getSelectedItem().name + "_" + hoveredType + "_" + hoveredObject.name);
+						} else if (inventoryItem != null) {
+							toolTip = Localization.getText(inventoryItem.name + "_" + hoveredType + "_" + hoveredObject.name);
 						} else {
 							toolTip = Localization.getText(hoveredType + "_" + hoveredObject.name);
 						}
 					}
 					break;
 				}
+			}
+			if (hoveredObject == null && inventoryItem != null)
+			{
+				hoveredType = inventoryItem.getOrder(null);
 			}
 		}
 		
@@ -150,9 +158,10 @@ class AdventureCursor implements Cursor {
 			Mouse.get().hideSystemCursor();
 			currentCursor.update(x, y);
 		} else {
-			Mouse.get().showSystemCursor();
 			currentCursor = null;
+			Mouse.get().showSystemCursor();
 		}
+
 		if (toolTipTop) {
 			toolTipY = y - clickY - 16;
 		} else {

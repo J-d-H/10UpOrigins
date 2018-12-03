@@ -1,5 +1,7 @@
-package sprites;
+package hr;
 
+import manipulatables.ManipulatableSprite;
+import hr.Workplace;
 import manipulatables.Can10up;
 import manipulatables.ManipulatableSprite.OrderType;
 import kha.Assets;
@@ -64,6 +66,7 @@ class RandomGuy extends UseableSprite {
 	public var employeeCansNot: Int;
 	public var employeeCans10up: Int;
 
+	public var workplace: Workplace = null;
 	public var status(default, set): WorkerStatus;
 
 	@:noCompletion
@@ -255,6 +258,8 @@ class RandomGuy extends UseableSprite {
 	@:access(kha2d.Animation)
 	public function updateState(deltaTime: Float): WorkerStatus
 	{
+		if (status == WorkerDead) return status;
+
 		// Employee aging and stats up-/ downgrades
 		employeeAge += deltaTime * FactoryState.globalTimeSpeed;
 
@@ -306,6 +311,7 @@ class RandomGuy extends UseableSprite {
 		{
 			case WorkerDying:
 			{
+				// now he is gone...
 				status = WorkerDead;
 			}
 			case WorkerDead:
