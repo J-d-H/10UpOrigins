@@ -137,7 +137,7 @@ class DiscreteGuy extends RandomGuy
 		if (employeeHealth > _maxHealth)
 			employeeHealth = _maxHealth;
 
-		employeeWage = _startingWage * Math.pow(0.03, Math.ffloor(employeeAge)); // + 3 % per Year
+		employeeWage = _startingWage * Math.pow(1.03, Math.ffloor(employeeAge)); // + 3 % per Year
 
 		// Pause progress
 		switch (status)

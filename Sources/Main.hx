@@ -395,7 +395,7 @@ class Main {
 			var guyDisplays : Array<StringPair> = [
 				{ key: guyBelowMouse.name, value: "" },
 				{ key: "Age: ", value: Std.string(Math.floor(guyBelowMouse.employeeAge + 18)) },
-				{ key: "Wage: ", value: Std.string(Math.floor(guyBelowMouse.employeeAge * 100) / 100) },
+				{ key: "Wage: ", value: Std.string(Math.floor(guyBelowMouse.employeeWage * 100) / 100) },
 				{ key: "Health: ", value: Std.string(Math.round(guyBelowMouse.employeeHealth * 100)) + "%" },
 				{ key: "Speed: ", value: Std.string(Math.round((5 / guyBelowMouse.employeeTimeForCan) * 100)) + "%" },
 				{ key: "Quality: ", value: Std.string(Math.round(guyBelowMouse.employeeProgressTo10UpPerCan * 100) / 100) },
