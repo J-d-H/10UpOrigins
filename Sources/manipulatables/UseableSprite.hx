@@ -50,11 +50,13 @@ class UseableSprite extends Sprite implements ManipulatableItem
 		Inventory.pick(this);
 	}
 	
-	public function loose(px : Int, py : Int) {
+	public function loose(px : Int, py : Int, destroy = false): Void
+	{
 		x = px;
 		y = py;
 		isInInventory = false;
-		Scene.the.addHero(this);
+		if (!destroy) Scene.the.addHero(this);
+		Inventory.loose(this);
 	}
 	
 	public function renderForInventory(g: Graphics, x : Int, y : Int, drawWidth : Int, drawHeight : Int) {
@@ -76,5 +78,10 @@ class UseableSprite extends Sprite implements ManipulatableItem
 		tempcollider.width  = collider.width * scaleX;
 		tempcollider.height = collider.height * scaleY;
 		return tempcollider;
+	}
+
+	override function update() {
+		if (isInInventory) return;
+		super.update();
 	}
 }

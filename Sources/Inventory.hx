@@ -78,6 +78,14 @@ class Inventory {
 		return null;
 	}
 	
+	public static function update(): Void
+	{
+		for (i in offset...items.length) {
+			var item = items[i];
+			item.update();
+		}
+	}
+
 	public static function paint(g: Graphics) {
 		var itemX = spacing;
 		var itemY = y + spacing;

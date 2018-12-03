@@ -35,6 +35,7 @@ class RandomGuy extends UseableSprite {
 	public var lookLeft: Bool;
 
 	private var renderColor: Color;
+	private var renderOpacity: Float = 1;
 	
 	public var sleeping: Bool;
 	
@@ -141,6 +142,19 @@ class RandomGuy extends UseableSprite {
 	}
 	
 	override public function update(): Void {
+		if (isInInventory) {
+			// wenn Tod - langsam ausblassen und dann verschwinden...
+			if (this.status == WorkerStatus.WorkerDead)
+			{
+				renderOpacity = renderOpacity - 0.01;
+				if (renderOpacity <= 0) {
+					renderOpacity = 0;
+					loose(0, 0 , true);
+				}
+			}
+			return;
+		}
+
 		super.update();
 
 		if (speedx > 0) {
@@ -164,6 +178,7 @@ class RandomGuy extends UseableSprite {
 	
 	override public function render(g: Graphics): Void {
 		if (image == null || !visible) return;
+		g.pushOpacity(renderOpacity);
 		if (sleeping) {
 			g.color = renderColor;
 			var angle = Math.PI / 2;
@@ -191,10 +206,12 @@ class RandomGuy extends UseableSprite {
 			g.fillRect( x - 2, y - 2, 5, 5 );
 			#end
 		}
+		g.popOpacity();
 	}
 
 	public override function renderForInventory(g: Graphics, x : Int, y : Int, drawWidth : Int, drawHeight : Int) {
 		if (image == null) return;
+		g.pushOpacity(renderOpacity);
 		if (sleeping) {
 			g.color = renderColor;
 			var angle = Math.PI / 2;
@@ -211,6 +228,7 @@ class RandomGuy extends UseableSprite {
 			g.color = renderColor;
 			g.drawScaledSubImage(image, Std.int(animation.get() * w) % image.width, Math.floor(animation.get() * w / image.width) * h, w, h, Math.round(x - collider.x * scaleX), Math.round(y - collider.y * scaleY), drawWidth, drawHeight);
 		}
+		g.popOpacity();
 	}
 
 	public override function getOrder(selectedItem : ManipulatableItem) : OrderType

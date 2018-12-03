@@ -321,8 +321,6 @@ class Main {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
 		
-		adventureCursor.update(mouseScreenPosX, mouseScreenPosY);
-		
 		if (!gamePaused)
 		{
 			Staff.update(deltaTime);
@@ -343,6 +341,9 @@ class Main {
 			Scene.the.camy = Std.int(Math.min(Scene.the.camy, Scene.the.getHeight() - Std.int(height / 2)));
 
 			Scene.the.update();
+		
+			Inventory.update();
+			adventureCursor.update(mouseScreenPosX, mouseScreenPosY);
 		}
 	}
 
@@ -449,7 +450,10 @@ class Main {
 			renderStatsBox(width / 2, height / 2, 15, yearDisplays, g, Center, Center);
 		}
 		
-		adventureCursor.render(g, mouseScreenPosX, mouseScreenPosY);
+		if (!gamePaused)
+		{
+			adventureCursor.render(g, mouseScreenPosX, mouseScreenPosY);
+		}
 		
 		g.end();
 
