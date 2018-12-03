@@ -101,6 +101,7 @@ class RandomGuy extends UseableSprite {
 		statusAnimations[WorkerWorkingHard] = new Animation([1, 2, 3, 3, 2, 1, 10, 11, 12, 12, 11, 10], 4);
 		lookLeft = false;
 		sleeping = false;
+		z = 5;
 		
 		employeeAge = employeeStartingAge;
 		employeeExperience = 0;
