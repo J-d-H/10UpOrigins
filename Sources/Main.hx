@@ -25,6 +25,20 @@ import kha2d.Scene;
 import kha2d.Tilemap;
 import kha2d.Tile;
 
+enum HAnchor
+{
+	Left;
+	Center;
+	Right;
+}
+
+enum VAnchor
+{
+	Top;
+	Center;
+	Down;
+}
+
 typedef StringPair = { key : String, value : String }
 
 class Main {
@@ -43,6 +57,7 @@ class Main {
 	private static var backbuffer: Image;
 	private static var font: Font;
     private static var lastTime = 0.0;
+    private static var gamePaused: Bool = false;
 	
 	public static var Player(default, null) = "Boss";
 	public static var npcSpawns : Array<Vector2> = new Array<Vector2>();
@@ -144,6 +159,12 @@ class Main {
 	}
 
 	private static function onMouseDown(button: Int, x: Int, y: Int): Void {
+		if (gamePaused)
+		{
+			gamePaused = false;
+			FactoryState.the.showYearlyStatsFlag = false;
+		}
+
 		updateMouse(x,y);
 
 		adventureCursor.onMouseDown(button, x, y);
@@ -300,26 +321,29 @@ class Main {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
 		
-		Staff.update(deltaTime);
-		FactoryState.the.update(deltaTime);
-
 		adventureCursor.update(mouseScreenPosX, mouseScreenPosY);
+		
+		if (!gamePaused)
+		{
+			Staff.update(deltaTime);
+			FactoryState.the.update(deltaTime);
 
-		if (mouseScenePosX  < scrollArea)
-			Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseScenePosX) / scrollArea));
-		if (mouseScenePosX > window.width - scrollArea)
-			Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (window.width - mouseScenePosX)) / scrollArea));
-		Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
-		Scene.the.camx = Std.int(Math.min(Scene.the.camx, Scene.the.getWidth() - Std.int(width / 2)));
+			if (mouseScenePosX  < scrollArea)
+				Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseScenePosX) / scrollArea));
+			if (mouseScenePosX > window.width - scrollArea)
+				Scene.the.camx += Std.int(scrollSpeed * ((scrollArea - (window.width - mouseScenePosX)) / scrollArea));
+			Scene.the.camx = Std.int(Math.max(Scene.the.camx, Std.int(width / 2)));
+			Scene.the.camx = Std.int(Math.min(Scene.the.camx, Scene.the.getWidth() - Std.int(width / 2)));
 
-		if (mouseScenePosY < scrollArea)
-			Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mouseScenePosY) / scrollArea));
-		if (mouseScenePosY > window.height - scrollArea)
-			Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (window.height - mouseScenePosY)) / scrollArea));
-		Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
-		Scene.the.camy = Std.int(Math.min(Scene.the.camy, Scene.the.getHeight() - Std.int(height / 2)));
+			if (mouseScenePosY < scrollArea)
+				Scene.the.camy -= Std.int(scrollSpeed * ((scrollArea - mouseScenePosY) / scrollArea));
+			if (mouseScenePosY > window.height - scrollArea)
+				Scene.the.camy += Std.int(scrollSpeed * ((scrollArea - (window.height - mouseScenePosY)) / scrollArea));
+			Scene.the.camy = Std.int(Math.max(Scene.the.camy, Std.int(height / 2)));
+			Scene.the.camy = Std.int(Math.min(Scene.the.camy, Scene.the.getHeight() - Std.int(height / 2)));
 
-		Scene.the.update();
+			Scene.the.update();
+		}
 	}
 
 	static function render(framebuffer: Framebuffer): Void {
@@ -338,16 +362,16 @@ class Main {
 
 		g.font = font;
 		g.fontSize = 24;
-		var spac: Int = 5;
 		
+		var spac: Int = 5;
 		var hudDisplays : Array<StringPair> = [
-			{ key: "Time: ", value: Std.string(1 + FactoryState.the.months) + "/" + Std.string(FactoryState.the.years) },
+			{ key: "Time: ", value: Std.string(1 + FactoryState.the.months) + "/" + Std.string(1 + FactoryState.the.years) },
 			{ key: "Money: ", value: Std.string(FactoryState.the.money) },
 			{ key: "Cans: ", value: Std.string(FactoryState.the.cansNormal) },
 			{ key: "10ups: ", value: Std.string(FactoryState.the.cans10up) },
 			{ key: "Deaths: ", value: Std.string(FactoryState.the.casualties) }
 		];
-		renderStatsBox(width - spac, spac, hudDisplays, g, true);
+		renderStatsBox(width - spac, spac, 5, hudDisplays, g, Right, Top);
 
 		// Debug only
 		#if debug
@@ -371,7 +395,7 @@ class Main {
 				{ key: "Cans: ", value: Std.string(Math.floor(guyBelowMouse.employeeCansNot)) },
 				{ key: "10ups: ", value: Std.string(Math.floor(guyBelowMouse.employeeCans10up)) }
 			];
-			renderStatsBox(mouseScreenPosX, mouseScreenPosY, guyDisplays, g, false);
+			renderStatsBox(mouseScreenPosX, mouseScreenPosY, 5, guyDisplays, g, Left, Top);
 		}
 
 		#if false
@@ -382,29 +406,88 @@ class Main {
 		];
 		renderStatsBox(mouseScreenPosX, mouseScreenPosY, guyDisplays, g, false);
 		#end
+		if (FactoryState.the.showYearlyStatsFlag)
+		{
+			gamePaused = true;
+			g.fontSize = 36;
 
-		adventureCursor.render(g, mouseScreenPosX, mouseScreenPosY);
-
-		g.end();
+			var yearDisplays : Array<StringPair> = [
+				{ key: "Summary of year " + Std.string(1 + FactoryState.the.years - 1), value: "" },
+				{ key: "", value: "" },
+				{ key: "Income:    ", value: Std.string(
+					FactoryState.the.yearlyIncome[FactoryState.the.yearlyIncome.length - 1]) +
+				 		(FactoryState.the.yearlyIncome.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyIncome[FactoryState.the.yearlyIncome.length - 1] -
+								 FactoryState.the.yearlyIncome[FactoryState.the.yearlyIncome.length - 2])
+							: "") },
+				{ key: "Wages:    ", value: Std.string(FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 1]) +
+				 		(FactoryState.the.yearlyWages.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 1] -
+								 FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 2])
+							: "") },
+				{ key: "Cans:    ", value: Std.string(FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 1]) +
+				 		(FactoryState.the.yearlyCansNormal.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 1] -
+								 FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 2])
+							: "") },
+				{ key: "10ups:    ", value: Std.string(FactoryState.the.yearlyCans10up[FactoryState.the.yearlyCans10up.length - 1]) +
+				 		(FactoryState.the.yearlyCans10up.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyCans10up[FactoryState.the.yearlyCans10up.length - 1] -
+								 FactoryState.the.yearlyCans10up[FactoryState.the.yearlyCans10up.length - 2])
+							: "") },
+				{ key: "Deaths:    ", value: Std.string(FactoryState.the.yearlyCasualties[FactoryState.the.yearlyCasualties.length - 1]) +
+				 		(FactoryState.the.yearlyCasualties.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyCasualties[FactoryState.the.yearlyCasualties.length - 1] -
+								 FactoryState.the.yearlyCasualties[FactoryState.the.yearlyCasualties.length - 2])
+							: "") }
+			];
+			renderStatsBox(width / 2, height / 2, 15, yearDisplays, g, Center, Center);
+		}
 		
+		adventureCursor.render(g, mouseScreenPosX, mouseScreenPosY);
+		
+		g.end();
+
 		framebuffer.g2.begin();
 		Scaler.scale(backbuffer, framebuffer, System.screenRotation);
 		framebuffer.g2.end();
 	}
 
-	private static function renderStatsBox(x: Int, y: Int, stats: Array<StringPair>, g: kha.graphics2.Graphics, right: Bool)
+	private static function formatChange(change: Int): String
+	{
+		if (change > 0)
+		{
+			return " (+" + Std.string(change) + ")";
+		}
+		else if (change < 0)
+		{
+			return " (" + Std.string(change) + ")";
+		}
+		else
+		{
+			return " (+/-" + Std.string(change) + ")";
+		}
+	}
+
+	private static function renderStatsBox(x: Float, y: Float, pad: Float, stats: Array<StringPair>, g: kha.graphics2.Graphics, hAnchor: HAnchor, vAnchor: VAnchor)
 	{
 		var stringWidth: Float = 0;
 		for (i in 0...stats.length)
 			stringWidth = Math.max(g.font.width(g.fontSize, stats[i].key + stats[i].value), stringWidth);
 		var stringHeight: Float = g.font.height(g.fontSize);
 
-		var pad: Int = 5;
-		var xOffset: Float = right ? x - (stringWidth + 2 * pad) : x;
-		var yOffset: Float = y;
+		var boxWidth: Float = stringWidth + 2 * pad;
+		var boxHeight: Float = stringHeight * stats.length + pad * (stats.length + 1);
+		var xOffset: Float = hAnchor == Left ? x : (hAnchor == Right ? x - boxWidth : x - boxWidth / 2);
+		var yOffset: Float = vAnchor == Top ? y : (vAnchor == Down ? y - boxHeight : y - boxHeight / 2);
 
 		g.color = Color.Black;
-		g.fillRect(xOffset, yOffset, stringWidth + 2 * pad, stringHeight * stats.length + pad * (stats.length + 1));
+		g.fillRect(xOffset, yOffset, boxWidth, boxHeight);
 		
 		g.color = Color.White;
 		xOffset += pad;
