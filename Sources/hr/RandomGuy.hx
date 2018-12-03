@@ -232,7 +232,7 @@ class RandomGuy extends UseableSprite {
 			return OrderType.WorkHarder;
 		}
 		return OrderType.ToolTip;
-	}
+		}
 
 	public override function executeOrder(order : OrderType) : Void
 	{
@@ -252,6 +252,19 @@ class RandomGuy extends UseableSprite {
 			}
 		default:
 			super.executeOrder(order);
+		}
+	}
+
+	override function take() {
+		if (status == WorkerDead)
+		{
+			super.take();
+			this.workplace.worker = null;
+			this.workplace = null;
+		}
+		else 
+		{
+			throw "Lala, dieser status ist nicht da...";
 		}
 	}
 
