@@ -491,7 +491,9 @@ class Main {
 		if (yOffset + boxHeight >= height + Inventory.height) yOffset = height + Inventory.height - boxHeight;
 
 		g.color = Color.Black;
+		g.pushOpacity(0.75);
 		g.fillRect(xOffset, yOffset, boxWidth, boxHeight);
+		g.popOpacity();
 		
 		g.color = Color.White;
 		xOffset += pad;
