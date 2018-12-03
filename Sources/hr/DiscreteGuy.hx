@@ -131,6 +131,9 @@ class DiscreteGuy extends RandomGuy
 			employeeTimeForCan += 0.5 * Std.int(decayAge);
 		}
 
+		if (employeeHealth > _maxHealth)
+			employeeHealth = _maxHealth;
+
 		employeeWage = _startingWage * Math.pow(0.03, Math.ffloor(employeeAge)); // + 3 % per Year
 
 		// Pause progress
