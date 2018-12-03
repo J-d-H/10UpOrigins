@@ -147,7 +147,7 @@ class RandomGuy extends UseableSprite {
 			// wenn Tod - langsam ausblassen und dann verschwinden...
 			if (this.status == WorkerStatus.WorkerDead)
 			{
-				renderOpacity = renderOpacity - 0.01;
+				renderOpacity = renderOpacity - 0.005;
 				if (renderOpacity <= 0) {
 					renderOpacity = 0;
 					loose(0, 0 , true);

@@ -152,7 +152,7 @@ class Main {
 			if (Std.is(guy, RandomGuy))
 			{
 				var randomGuy : RandomGuy = cast guy;
-				if (randomGuy.status != WorkerDead)
+				if (randomGuy.status != WorkerDying)
 					return randomGuy;
 			}
 		}
@@ -391,7 +391,7 @@ class Main {
 		g.drawString("Hth: " + Std.string(Staff.allguys[0].employeeHealth), 10, 110);
 		#end
 		
-		if ((guyBelowMouse != null || guyBelowMouse.status == WorkerDead) && Inventory.getSelectedItem() == null)
+		if (guyBelowMouse != null && Inventory.getSelectedItem() == null)
 		{
 			var guyDisplays : Array<StringPair> = [
 				{ key: guyBelowMouse.name, value: "" },

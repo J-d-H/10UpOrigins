@@ -65,7 +65,7 @@ class AdventureCursor implements Cursor {
 		currentCursor = null;
 		Mouse.get().showSystemCursor();
 		font = Assets.fonts.LiberationSans_Regular;
-		fontSize = 14;
+		fontSize = 18;
 	}
 	
 	public function render(g: Graphics, x: Int, y: Int): Void {
