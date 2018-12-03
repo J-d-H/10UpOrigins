@@ -310,13 +310,13 @@ class Main {
 		var sceneXY = getSceneXY(mouseWindowPosX, mouseWindowPosY);
 		mouseScenePosX = sceneXY.x;
 		mouseScenePosY = sceneXY.y;
+
+		adventureCursor.update(mouseWindowPosX, mouseWindowPosY);
 		
 		if (!gamePaused)
 		{
 			Staff.update(deltaTime);
 			FactoryState.the.update(deltaTime);
-
-			adventureCursor.update(mouseWindowPosX, mouseWindowPosY);
 
 			if (mouseWindowPosX  < scrollArea)
 				Scene.the.camx -= Std.int(scrollSpeed * ((scrollArea - mouseWindowPosX) / scrollArea));
@@ -393,10 +393,37 @@ class Main {
 			var yearDisplays : Array<StringPair> = [
 				{ key: "Summary of year " + Std.string(1 + FactoryState.the.years - 1), value: "" },
 				{ key: "", value: "" },
-				{ key: "Income:    ", value: Std.string(FactoryState.the.yearlyMoney[FactoryState.the.yearlyMoney.length - 1]) },
-				{ key: "Cans:    ", value: Std.string(FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 1]) },
-				{ key: "10ups:    ", value: Std.string(FactoryState.the.yearlyCans10up[FactoryState.the.yearlyCans10up.length - 1]) },
-				{ key: "Deaths:    ", value: Std.string(FactoryState.the.yearlyCasualties[FactoryState.the.yearlyCasualties.length - 1]) }
+				{ key: "Income:    ", value: Std.string(
+					FactoryState.the.yearlyIncome[FactoryState.the.yearlyIncome.length - 1]) +
+				 		(FactoryState.the.yearlyIncome.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyIncome[FactoryState.the.yearlyIncome.length - 1] -
+								 FactoryState.the.yearlyIncome[FactoryState.the.yearlyIncome.length - 2])
+							: "") },
+				{ key: "Wages:    ", value: Std.string(FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 1]) +
+				 		(FactoryState.the.yearlyWages.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 1] -
+								 FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 2])
+							: "") },
+				{ key: "Cans:    ", value: Std.string(FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 1]) +
+				 		(FactoryState.the.yearlyCansNormal.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 1] -
+								 FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 2])
+							: "") },
+				{ key: "10ups:    ", value: Std.string(FactoryState.the.yearlyCans10up[FactoryState.the.yearlyCans10up.length - 1]) +
+				 		(FactoryState.the.yearlyCans10up.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyCans10up[FactoryState.the.yearlyCans10up.length - 1] -
+								 FactoryState.the.yearlyCans10up[FactoryState.the.yearlyCans10up.length - 2])
+							: "") },
+				{ key: "Deaths:    ", value: Std.string(FactoryState.the.yearlyCasualties[FactoryState.the.yearlyCasualties.length - 1]) +
+				 		(FactoryState.the.yearlyCasualties.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyCasualties[FactoryState.the.yearlyCasualties.length - 1] -
+								 FactoryState.the.yearlyCasualties[FactoryState.the.yearlyCasualties.length - 2])
+							: "") }
 			];
 			renderStatsBox(width / 2, height / 2, 15, yearDisplays, g, Center, Center);
 		}
@@ -408,6 +435,22 @@ class Main {
 		framebuffer.g2.begin();
 		Scaler.scale(backbuffer, framebuffer, System.screenRotation);
 		framebuffer.g2.end();
+	}
+
+	private static function formatChange(change: Int): String
+	{
+		if (change > 0)
+		{
+			return " (+" + Std.string(change) + ")";
+		}
+		else if (change < 0)
+		{
+			return " (" + Std.string(change) + ")";
+		}
+		else
+		{
+			return " (+/-" + Std.string(change) + ")";
+		}
 	}
 
 	private static function renderStatsBox(x: Float, y: Float, pad: Float, stats: Array<StringPair>, g: kha.graphics2.Graphics, hAnchor: HAnchor, vAnchor: VAnchor)
