@@ -81,6 +81,7 @@ class Inventory {
 		g.fillRect(0, y, Main.width, height);
 		g.color = Color.White;
 		for (i in offset...items.length) {
+			g.color = Color.White;
 			items[i].renderForInventory(g, itemX, itemY, itemWidth, itemHeight);
 			if (i == selected) {
 				g.color = Color.fromBytes(255, 0, 255);
