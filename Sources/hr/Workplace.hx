@@ -2,9 +2,9 @@ package hr;
 
 import kha.graphics2.Graphics;
 import kha2d.Rectangle;
-import manipulatables.ManipulatableSprite;
+import manipulatables.ManipulatableItem;
 import manipulatables.UseableSprite;
-import manipulatables.ManipulatableSprite.OrderType;
+import manipulatables.ManipulatableItem.OrderType;
 import kha.Assets;
 
 class Workplace extends UseableSprite
@@ -34,7 +34,7 @@ class Workplace extends UseableSprite
 		}
 	}
 
-	public override function getOrder(selectedItem : UseableSprite) : OrderType
+	public override function getOrder(selectedItem : ManipulatableItem) : OrderType
 	{
 		if (isInInventory)
 		{
@@ -49,7 +49,7 @@ class Workplace extends UseableSprite
 			if (visible) 
 			{
 				if (worker == null)
-					return OrderType.HireWorker;
+					return OrderType.UseItem;
 				else 
 					return OrderType.WontWork;
 				
@@ -62,23 +62,27 @@ class Workplace extends UseableSprite
 		else if (Std.is(selectedItem, Workplace))
 		{
 			if (visible) return OrderType.WontWork;
-			else return OrderType.BuildWorkplace;
+			else return OrderType.UseItem;
 		}
 		return OrderType.WontWork;
 	}
 
-	public override function executeOrder(order : OrderType) : Void
+	public override function executeOrder(order : OrderType, item : ManipulatableItem) : Void
 	{
 		switch (order)
 		{
-		case BuildWorkplace:
-			visible = true;
-			FactoryState.the.money -= FactoryState.workplaceInitialCosts;
-		case HireWorker:
-			var guy: DiscreteGuy = cast Inventory.getSelectedItem();
-			Staff.hireGuy(slot, new DiscreteGuy(guy.employeeWage, guy.employeeExperience, guy.employeeAge));
+		case UseItem:
+			if (Std.is(item, Workplace)) {
+				// build workplace
+				visible = true;
+				FactoryState.the.money -= FactoryState.workplaceInitialCosts;
+			} else if (Std.is(item, DiscreteGuy)) {
+				// hire worker
+				var guy: DiscreteGuy = cast Inventory.getSelectedItem();
+				Staff.hireGuy(slot, new DiscreteGuy(guy.employeeWage, guy.employeeExperience, guy.employeeAge));
+			}
 		default:
-			return super.executeOrder(order);
+			super.executeOrder(order, item);
 		}
 	}
 }

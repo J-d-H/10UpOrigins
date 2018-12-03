@@ -2,7 +2,7 @@ package;
 
 import hr.Workplace;
 import kha.input.Mouse;
-import manipulatables.ManipulatableSprite;
+import manipulatables.ManipulatableItem;
 //import kha.AnimatedImageCursor;
 import kha2d.Animation;
 import kha.Assets;
@@ -54,17 +54,14 @@ class AdventureCursor implements Cursor {
 	var cursors : Map<OrderType, Cursor> = new Map();
 	
 	public var hoveredType : OrderType = Nothing;
-	public var hoveredObject : ManipulatableSprite = null;
+	public var hoveredObject : ManipulatableItem = null;
 	
 	public var forcedTooltip : String = null;
 	
 	public function new() {
-		cursors[Take] = new ImageCursor(Assets.images.handcursor, 6, 9);
-		cursors[InventoryItem] = new ImageCursor(Assets.images.handcursor, 6, 9);
-		cursors[WontWork] = new ImageCursor(Assets.images.pizza_pixel, 5, 5); // TODO: cursor
-		cursors[WorkHarder] = new ImageCursor(Assets.images.spritze2, 32, 16);
-		cursors[BuildWorkplace] = new ImageCursor(Assets.images.coffee, 16, 32, 32, 64);
-		cursors[HireWorker] = new ImageCursor(Assets.images.nullachtsechzehnmann, 16, 32, 32, 64);
+		cursors[OrderType.Take] = new ImageCursor(Assets.images.handcursor, 6, 9);
+		cursors[OrderType.InventoryItem] = new ImageCursor(Assets.images.handcursor, 6, 9);
+		cursors[OrderType.WontWork] = new ImageCursor(Assets.images.wontwork, -2, -2); // TODO: cursor
 		currentCursor = null;
 		Mouse.get().showSystemCursor();
 		font = Assets.fonts.LiberationSans_Regular;
@@ -72,15 +69,23 @@ class AdventureCursor implements Cursor {
 	}
 	
 	public function render(g: Graphics, x: Int, y: Int): Void {
+		var inventoryItem = Inventory.getSelectedItem();
+		if (inventoryItem != null && y < Main.height) {
+			g.color = Color.White;
+			g.pushOpacity(0.7);
+			inventoryItem.renderForInventory(g, x - 32, y - 32, 64, 64);
+			g.popOpacity();
+		}
+
 		if (currentCursor != null) {
 			g.color = Color.White;
 			currentCursor.render(g, x, y);
-			
-			if (forcedTooltip != null) {
-				drawTooltip(g, forcedTooltip, x, toolTipY);
-			} else if (toolTip != null) {
-				drawTooltip(g, toolTip, x, toolTipY);
-			}
+		}
+		
+		if (forcedTooltip != null) {
+			drawTooltip(g, forcedTooltip, x, toolTipY);
+		} else if (toolTip != null) {
+			drawTooltip(g, toolTip, x, toolTipY);
 		}
 	}
 	
@@ -109,7 +114,7 @@ class AdventureCursor implements Cursor {
 		{
 			if (hoveredObject != null)
 			{
-				hoveredObject.executeOrder(hoveredType);
+				hoveredObject.executeOrder(hoveredType, Inventory.getSelectedItem());
 			}
 		}
 	}
@@ -129,7 +134,7 @@ class AdventureCursor implements Cursor {
 			toolTip = null;
 		} else {
 			for (obj in Scene.the.getSpritesBelowPoint(x + Scene.the.screenOffsetX, y + Scene.the.screenOffsetY)) {
-				if (Std.is(obj, ManipulatableSprite)) {
+				if (Std.is(obj, ManipulatableItem)) {
 					hoveredObject = cast obj;
 					hoveredType = hoveredObject.getOrder(inventoryItem);
 					if (hoveredType == OrderType.Nothing) {
@@ -157,6 +162,9 @@ class AdventureCursor implements Cursor {
 			currentCursor = cursors[hoveredType];
 			Mouse.get().hideSystemCursor();
 			currentCursor.update(x, y);
+		} else if (inventoryItem != null) {
+			currentCursor = null;
+			Mouse.get().hideSystemCursor();
 		} else {
 			currentCursor = null;
 			Mouse.get().showSystemCursor();

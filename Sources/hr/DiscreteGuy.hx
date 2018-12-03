@@ -1,9 +1,10 @@
 package hr;
 
-import manipulatables.ManipulatableSprite;
+import manipulatables.Injection;
+import manipulatables.ManipulatableItem;
 import hr.RandomGuy;
 import manipulatables.UseableSprite;
-import manipulatables.ManipulatableSprite.OrderType;
+import manipulatables.ManipulatableItem.OrderType;
 
 class DiscreteGuy extends RandomGuy
 {
@@ -218,7 +219,7 @@ class DiscreteGuy extends RandomGuy
 		return status;
 	}
 
-	public override function getOrder(selectedItem : UseableSprite) : OrderType
+	public override function getOrder(selectedItem : ManipulatableItem) : OrderType
 	{
 		if (isInInventory)
 		{
@@ -237,32 +238,37 @@ class DiscreteGuy extends RandomGuy
 		{
 			if (Std.is(selectedItem, manipulatables.Injection))
 			{
-				return OrderType.WorkHarder;
+				return OrderType.UseItem;
 			}
 			return OrderType.WontWork;
 		}
 
-		return OrderType.ToolTip;
+		return OrderType.Nothing;
 	}
 
-	public override function executeOrder(order : OrderType) : Void
+	public override function executeOrder(order : OrderType, item : ManipulatableItem) : Void
 	{
 		switch (order)
 		{
-		case WorkHarder:
-			switch (status)
+		case UseItem:
+			if (Std.is(item, Injection))
 			{
-			case WorkerDying, WorkerDead:
-				throw "Findet nicht statt.";
-			case WorkerSleeping, WorkerPause:
-				status = WorkerWorking;
-			case WorkerWorking, WorkerWorkingMotivated:
-				status = WorkerWorkingHard;
-			case WorkerWorkingHard:
-				status = WorkerWorkingHard;
+				switch (status)
+				{
+				case WorkerDying, WorkerDead:
+					throw "Findet nicht statt.";
+				case WorkerSleeping, WorkerPause:
+					status = WorkerWorking;
+				case WorkerWorking, WorkerWorkingMotivated:
+					status = WorkerWorkingHard;
+				case WorkerWorkingHard:
+					status = WorkerWorkingHard;
+				}
+			} else {
+				throw "Noch nicht da - wird auch nicht mehr implementiert.";
 			}
 		default:
-			super.executeOrder(order);
+			super.executeOrder(order, item);
 		}
 	}
 }

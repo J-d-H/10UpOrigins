@@ -32,12 +32,16 @@ class Inventory {
 		return items.length == 0;
 	}
 	
+	@:access(manipulatables.UseableSprite.isInInventory)
 	public static function pick(item : UseableSprite) {
 		items.push(item);
+		item.isInInventory = true;
 	}
 	
+	@:access(manipulatables.UseableSprite.isInInventory)
 	public static function loose(item : UseableSprite) {
 		items.remove(item);
+		item.isInInventory = false;
 	}
 	
 	public static function select(item : UseableSprite) {

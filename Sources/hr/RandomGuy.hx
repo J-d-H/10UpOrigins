@@ -1,9 +1,9 @@
 package hr;
 
-import manipulatables.ManipulatableSprite;
+import manipulatables.ManipulatableItem;
 import hr.Workplace;
 import manipulatables.Can10up;
-import manipulatables.ManipulatableSprite.OrderType;
+import manipulatables.ManipulatableItem.OrderType;
 import kha.Assets;
 import kha.Color;
 import kha.graphics2.Graphics;
@@ -213,7 +213,7 @@ class RandomGuy extends UseableSprite {
 		}
 	}
 
-	public override function getOrder(selectedItem : UseableSprite) : OrderType
+	public override function getOrder(selectedItem : ManipulatableItem) : OrderType
 	{
 		if (isInInventory)
 		{
@@ -229,16 +229,20 @@ class RandomGuy extends UseableSprite {
 		}
 		else if (Std.is(selectedItem, manipulatables.Injection))
 		{
-			return OrderType.WorkHarder;
+			return OrderType.UseItem;
 		}
-		return OrderType.ToolTip;
+		else if (selectedItem != null)
+		{
+			return OrderType.WontWork;
 		}
+		return OrderType.Nothing;
+	}
 
-	public override function executeOrder(order : OrderType) : Void
+	public override function executeOrder(order : OrderType, item : ManipulatableItem) : Void
 	{
 		switch (order)
 		{
-		case WorkHarder:
+		case UseItem:
 			switch (status)
 			{
 			case WorkerDying, WorkerDead:
@@ -251,7 +255,7 @@ class RandomGuy extends UseableSprite {
 				status = WorkerWorkingHard;
 			}
 		default:
-			super.executeOrder(order);
+			super.executeOrder(order, item);
 		}
 	}
 
