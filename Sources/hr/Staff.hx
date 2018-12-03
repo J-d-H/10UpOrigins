@@ -56,4 +56,17 @@ class Staff
 		}
 		return personMonths;
 	}
+
+	public static function calcWorkplaceCosts(): Float
+	{
+		var costs: Float = 0;
+		for (i in 0...workplaces.length)
+		{
+			if (workplaces[i].visible) 
+			{
+				costs += FactoryState.workplaceCostsPerYear;
+			}
+		}
+		return costs;
+	}
 }

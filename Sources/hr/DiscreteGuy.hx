@@ -70,43 +70,48 @@ class DiscreteGuy extends RandomGuy
 		}
 		else if (employeeExperience < 2) 
 		{
-			employeeTimeForCan =  8;
+			employeeTimeForCan =  9;
 			employeeProgressTo10UpPerCan = 0;
 		}
 		else if (employeeExperience < 3)
 		{
-			employeeTimeForCan =  7;
+			employeeTimeForCan =  8;
 			employeeProgressTo10UpPerCan = 0.1;
 		}
 		else if (employeeExperience < 4)
 		{
-			employeeTimeForCan =  6;
+			employeeTimeForCan =  7.25;
 			employeeProgressTo10UpPerCan = 0.15;
 		}
 		else if (employeeExperience < 5)
 		{
-			employeeTimeForCan =  5;
+			employeeTimeForCan =  6.5;
 			employeeProgressTo10UpPerCan = 0.2;
 		}
 		else if (employeeExperience < 6)
 		{
-			employeeTimeForCan =  5;
+			employeeTimeForCan =  5.75;
 			employeeProgressTo10UpPerCan = 0.25;
 		}
 		else if (employeeExperience < 7)
 		{
 			employeeTimeForCan =  5;
-			employeeProgressTo10UpPerCan = 0.33;
+			employeeProgressTo10UpPerCan = 0.3;
 		}
 		else if (employeeExperience < 8)
 		{
 			employeeTimeForCan =  5;
-			employeeProgressTo10UpPerCan = 0.5;
+			employeeProgressTo10UpPerCan = 0.35;
 		}
 		else if (employeeExperience < 9)
 		{
 			employeeTimeForCan =  5;
-			employeeProgressTo10UpPerCan = 0.75;
+			employeeProgressTo10UpPerCan = 0.4;
+		}
+		else if (employeeExperience < 10)
+		{
+			employeeTimeForCan =  5;
+			employeeProgressTo10UpPerCan = 0.45;
 		}
 		else if (employeeExperience > 999)
 		{
@@ -117,7 +122,7 @@ class DiscreteGuy extends RandomGuy
 		else
 		{
 			employeeTimeForCan =  5;
-			employeeProgressTo10UpPerCan = 1.0;
+			employeeProgressTo10UpPerCan = 0.5;
 		}
 
 		employeeTimeForCan /= workFactor;
@@ -129,8 +134,9 @@ class DiscreteGuy extends RandomGuy
 		var maxAge = 100;
 		if (employeeAge > decayStartAge)
 		{
-			var decayAge = employeeAge - decayStartAge;
-			_maxHealth -= 1.0/(maxAge - decayStartAge) *  decayAge;
+			var decayAge: Float = employeeAge - decayStartAge;
+			var decayFactor: Float = 1.0/(maxAge - decayStartAge);
+			_maxHealth -= decayFactor * deltaTime * FactoryState.globalTimeSpeed;
 			ageWorkingHealthFactor = 1 + 0.1 * decayAge;
 			agePauseTimeFactor = 1 + 0.1 * decayAge;
 			agePauseHealthFactor = 1 - 0.05 * decayAge;
@@ -141,7 +147,7 @@ class DiscreteGuy extends RandomGuy
 		if (employeeHealth > _maxHealth)
 			employeeHealth = _maxHealth;
 
-		employeeWage = _startingWage * Math.pow(1.07, Math.ffloor(employeeAge-_startingAge)); // + 3 % per Year
+		employeeWage = _startingWage * Math.pow(1.07, Math.ffloor(employeeAge-_startingAge)); // + 7 % per Year
 
 		// Pause progress
 		switch (status)
@@ -164,13 +170,14 @@ class DiscreteGuy extends RandomGuy
 				employeeTimeForCurrentPause += deltaTime * FactoryState.workTimeFactor;
 				if (employeeTimeForCurrentPause >= timeForPause * agePauseTimeFactor)
 				{
-					employeeTimeForCurrentPause -= timeForPause;
 					status = (employeeHealth >= motivatedWorkingStartHealth) ? WorkerWorkingMotivated : WorkerWorking;
 					animation.speeddiv = Std.int(Math.max(employeeTimeForCan*2, 1));
 				}
 			}
 			case WorkerWorking | WorkerWorkingMotivated | WorkerWorkingHard:
 			{
+				employeeTimeForCurrentPause = 0;
+
 				animation.speeddiv = Std.int(Math.max(employeeTimeForCan*2, 1));
 				employeeHealth += healthChangeWhenWorking * deltaTime 
 				                  * workHealthFactor 

@@ -202,8 +202,8 @@ class Main {
 		Inventory.init();
 		Inventory.pick(new Workplace(-1));
 		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_1, 1, 0, 0));
-		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_2, 1.5, 1, 2));
-		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_3, 2, 3, 5));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_2, 2, 2, 3));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_3, 4, 5, 8));
 		Inventory.pick(new manipulatables.Encourage(0,0));
 		Inventory.pick(new Injection(0,0));
 
@@ -391,7 +391,7 @@ class Main {
 		g.drawString("Hth: " + Std.string(Staff.allguys[0].employeeHealth), 10, 110);
 		#end
 		
-		if (guyBelowMouse != null && Inventory.getSelectedItem() == null)
+		if ((guyBelowMouse != null || guyBelowMouse.status == WorkerDead) && Inventory.getSelectedItem() == null)
 		{
 			var guyDisplays : Array<StringPair> = [
 				{ key: guyBelowMouse.name, value: "" },
@@ -459,6 +459,12 @@ class Main {
 				 			formatChange
 							 	(FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 1] -
 								 FactoryState.the.yearlyWages[FactoryState.the.yearlyWages.length - 2])
+							: "") },
+				{ key: "Costs:    ", value: Std.string(FactoryState.the.yearlyCosts[FactoryState.the.yearlyCosts.length - 1]) +
+				 		(FactoryState.the.yearlyCosts.length > 1 ? 
+				 			formatChange
+							 	(FactoryState.the.yearlyWages[FactoryState.the.yearlyCosts.length - 1] -
+								 FactoryState.the.yearlyWages[FactoryState.the.yearlyCosts.length - 2])
 							: "") },
 				{ key: "Cans:    ", value: Std.string(FactoryState.the.yearlyCansNormal[FactoryState.the.yearlyCansNormal.length - 1]) +
 				 		(FactoryState.the.yearlyCansNormal.length > 1 ? 
