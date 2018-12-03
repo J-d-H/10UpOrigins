@@ -199,6 +199,7 @@ class Main {
 		Inventory.pick(new DiscreteGuy(0.1, 0, 0));
 		Inventory.pick(new DiscreteGuy(0.2, 1, 2));
 		Inventory.pick(new DiscreteGuy(0.3, 3, 5));
+		Inventory.pick(new manipulatables.Encourage(0,0));
 		Inventory.pick(new Injection(0,0));
 
 		initLevel();

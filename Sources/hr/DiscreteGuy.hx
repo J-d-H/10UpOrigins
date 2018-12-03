@@ -1,5 +1,6 @@
 package hr;
 
+import manipulatables.Encourage;
 import manipulatables.Injection;
 import manipulatables.ManipulatableItem;
 import hr.RandomGuy;
@@ -243,6 +244,10 @@ class DiscreteGuy extends RandomGuy
 			{
 				return OrderType.UseItem;
 			}
+			else if (Std.is(selectedItem, Encourage))
+			{
+				return OrderType.UseItem;
+			}
 			return OrderType.WontWork;
 		}
 
@@ -261,13 +266,30 @@ class DiscreteGuy extends RandomGuy
 				case WorkerDying, WorkerDead:
 					throw "Findet nicht statt.";
 				case WorkerSleeping, WorkerPause:
-					status = WorkerWorking;
+					status = WorkerWorkingHard;
 				case WorkerWorking, WorkerWorkingMotivated:
 					status = WorkerWorkingHard;
 				case WorkerWorkingHard:
 					status = WorkerWorkingHard;
 				}
-			} else {
+			} 
+			else if (Std.is(item, Encourage))
+			{
+				switch (status)
+				{
+				case WorkerDying, WorkerDead:
+					throw "Findet nicht statt.";
+				case WorkerSleeping, WorkerPause:
+					status = WorkerWorking;
+				case WorkerWorking, WorkerWorkingMotivated:
+					status = WorkerWorking;
+				case WorkerWorkingHard:
+					status = WorkerWorking;
+				}
+				employeeHealth -= 0.005;
+			} 
+			else 
+			{
 				throw "Noch nicht da - wird auch nicht mehr implementiert.";
 			}
 		default:

@@ -63,10 +63,10 @@ class UseableSprite extends Sprite implements ManipulatableItem
 		if (image != null) {
 			var w: kha.FastFloat = drawWidth;
 			var h: kha.FastFloat = drawHeight;
-			var scaleX: kha.FastFloat = width/drawWidth;
-			var sceleY: kha.FastFloat = height/drawHeight;
-			if (scaleX < scaleY) w *= scaleX;
-			else h *= scaleY;
+			var originalAspect: kha.FastFloat = width/height;
+			var scaledAspect: kha.FastFloat = drawWidth/drawHeight;
+			if (originalAspect < scaledAspect) w *= originalAspect/scaledAspect;
+			else h *= scaledAspect/originalAspect;
 			g.drawScaledSubImage(image, Std.int(animation.get() * width) % image.width, Math.floor(animation.get() * width / image.width) * height, width, height, x + 0.5 * (drawWidth-w), y + 0.5 * (drawHeight-h), w, h);
 		}
 	}
