@@ -39,7 +39,7 @@ class DiscreteGuy extends RandomGuy
 		employeeAge += deltaTime * FactoryState.globalTimeSpeed;
 
 		// Experience aging for up-/downgrades
-		var experienceGain = 0.05 * deltaTime * FactoryState.globalTimeSpeed;
+		var experienceGain = 0.5 * deltaTime * FactoryState.globalTimeSpeed;
 		var workFactor: Float = 1;
 		var workHealthFactor: Float = 1;
 		switch (status)
@@ -61,22 +61,22 @@ class DiscreteGuy extends RandomGuy
 
 		if (employeeExperience < 1)	
 		{
-			employeeTimeForCan =  20;
+			employeeTimeForCan =  10;
 			employeeProgressTo10UpPerCan = 0;
 		}
 		else if (employeeExperience < 2) 
 		{
-			employeeTimeForCan =  15;
+			employeeTimeForCan =  8;
 			employeeProgressTo10UpPerCan = 0;
 		}
 		else if (employeeExperience < 3)
 		{
-			employeeTimeForCan =  10;
+			employeeTimeForCan =  7;
 			employeeProgressTo10UpPerCan = 0.1;
 		}
 		else if (employeeExperience < 4)
 		{
-			employeeTimeForCan =  7.5;
+			employeeTimeForCan =  6;
 			employeeProgressTo10UpPerCan = 0.15;
 		}
 		else if (employeeExperience < 5)
@@ -115,6 +115,8 @@ class DiscreteGuy extends RandomGuy
 			employeeTimeForCan =  5;
 			employeeProgressTo10UpPerCan = 1.0;
 		}
+
+		employeeTimeForCan /= workFactor;
 
 		var ageWorkingHealthFactor: Float = 1;
 		var agePauseHealthFactor: Float = 1;

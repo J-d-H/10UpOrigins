@@ -172,7 +172,6 @@ class Main {
 
 	private static function onMouseUp(button: Int, x: Int, y: Int): Void
 	{
-		trace("x,y=" + x + "/" + y);
 		updateMouse(x, y);
 
 		adventureCursor.onMouseUp(button,x,y);
