@@ -384,7 +384,7 @@ class Main {
 		g.drawString("Hth: " + Std.string(Staff.allguys[0].employeeHealth), 10, 110);
 		#end
 		
-		if (guyBelowMouse != null)
+		if (guyBelowMouse != null && Inventory.getSelectedItem() == null)
 		{
 			var guyDisplays : Array<StringPair> = [
 				{ key: guyBelowMouse.name, value: "" },
