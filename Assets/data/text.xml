@@ -1,0 +1,127 @@
+<!-- 
+	The DefaultLanguage tag specifies the 
+	fallback language of this file.
+	All keys that don't have an other language will
+	use the default language instead.
+	I.e. the original language of this file
+-->
+<DefaultLanguage>de</DefaultLanguage>
+
+<Title>
+	<de>10Up: Origins</de>
+	<en>10Up: Origins</en>
+</Title>
+
+
+<Agent>
+	<de>Mr. S</de>
+	<en>Mr. S</en>
+</Agent>
+<Mechanic>
+	<de>Ms. M</de>
+	<en>Ms. M</en>
+</Mechanic>
+<Professor>
+	<de>Professor</de>
+	<en>Professor</en>
+</Professor>
+
+
+<click_to_start>
+	<de>Beliebige Taste zum Starten (ESC for options)</de>
+	<en>Press any key to start (ESC for options)</en>
+</click_to_start>
+
+<!-- inventory items -->
+<Workplace>
+	<de>Arbeitsplatz</de>
+	<en>Workplace</en>
+</Workplace>
+
+
+<!-- Abilities -->
+<Encourage>
+	<de>Ermutigen</de>
+	<en>Encourage</en>
+</Encourage>
+<Injection>
+	<de>Aufputschmittel spritzen</de>
+	<en>Inject stimulant</en>
+</Injection>
+<BuildWorkplace>
+	<de>Abartsplatz einrichten ({0})</de>
+	<en>Build workplace ({0})</en>
+</BuildWorkplace>
+<HireWorker_1>
+	<de>Unerfahren Arbeiter anheuern</de>
+	<en>Hire unerfahrenen worker</en>
+</HireWorker_1>
+<HireWorker_2>
+	<de>Arbeiter anheuern</de>
+	<en>Hire worker</en>
+</HireWorker_2>
+<HireWorker_3>
+	<de>Erfahrenen Arbeiter anheuern</de>
+	<en>Hire experienced worker</en>
+</HireWorker_3>
+
+<Encourage_WontWork>
+	<de>Hier ist niemand zu ermutigen...</de>
+	<en>Nobody to encourage here...</en>
+</Encourage_WontWork>
+<Injection_WontWork>
+	<de>Kein Arbeiter zum aufputschen</de>
+	<en>No worker to stimulate</en>
+</Injection_WontWork>
+<BuildWorkplace_WontWork>
+	<de>Abartsplatz kann hier nicht eingerichtet werden</de>
+	<en>Can't build workplace here</en>
+</BuildWorkplace_WontWork>
+<HireWorker_1_WontWork>
+	<de>Unerfahren Arbeiter anheuern</de>
+	<en>Hire unerfahrenen worker</en>
+</HireWorker_1_WontWork>
+<HireWorker_2_WontWork>
+	<de>Arbeiter anheuern</de>
+	<en>Hire worker</en>
+</HireWorker_2_WontWork>
+<HireWorker_3_WontWork>
+	<de>Erfahrenen Arbeiter anheuern</de>
+	<en>Hire experienced worker</en>
+</HireWorker_3_WontWork>
+	
+<Encourage_UseItem>
+	<de>Ermutigen</de>
+	<en>Encourage</en>
+</Encourage_UseItem>
+<Injection_UseItem>
+	<de>Arbeiter aufputschen</de>
+	<en>Stimulate worker</en>
+</Injection_UseItem>
+<BuildWorkplace_UseItem>
+	<de>Abartsplatz hier einrichten</de>
+	<en>Build workplace here</en>
+</BuildWorkplace_UseItem>
+<HireWorker_1_UseItem>
+	<de>Unerfahren Arbeiter anheuern</de>
+	<en>Hire unerfahrenen worker</en>
+</HireWorker_1_UseItem>
+<HireWorker_2_UseItem>
+	<de>Arbeiter anheuern</de>
+	<en>Hire worker</en>
+</HireWorker_2_UseItem>
+<HireWorker_3_UseItem>
+	<de>Erfahrenen Arbeiter anheuern</de>
+	<en>Hire experienced worker</en>
+</HireWorker_3_UseItem>
+
+<!-- misc -->
+<back>
+	<de>Zurück</de>
+	<en>Back</en>
+</back>
+
+<WorkerNames>
+	<de>Augusto, Ingo, Christian, Robert, Björn, Johannes, Rebecca, Stephen, Alvar, Michael, Linh, Roger, Roman, Max, Paul, Tobias, Henno, Niko, Kai, Julian</de>
+</WorkerNames>
+

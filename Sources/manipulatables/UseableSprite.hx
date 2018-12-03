@@ -10,20 +10,33 @@ import manipulatables.ManipulatableItem.OrderType;
 class UseableSprite extends Sprite implements ManipulatableItem
 {
 	public var isInInventory(default, null) : Bool = false;
-	
-	public function new(name: String, image: Image, px : Float, py : Float, width: Int = 0, height: Int = 0, z: Int = 1) {
+
+	private var _inventoryName: String;
+
+	public function new(name: String, image: Image, px : Float, py : Float, width: Int = 0, height: Int = 0, z: Int = 1, inventoryName: String = null) {
 		super(image, width, height, z);
 		x = px;
 		y = py;
 		accy = 0;
 		this.name = name;
+		_inventoryName = inventoryName;
 	}
-	
+
 	private function get_name() : String {
+		if (isInInventory && _inventoryName != null)
+		{
+			return _inventoryName;
+		}
 		return name;
+	}
+
+	private function get_nameTranslated(): String
+	{
+		return Localization.getText(get_name());
 	}
 	
 	public var name(get, null) : String;
+	public var nameTranslated(get, null): String;
 	
 	public function canBeManipulatedWith(item : ManipulatableItem) : Bool {
 		throw "Not implemented.";

@@ -51,7 +51,7 @@ class Staff
 		{
 			if (workplaces[i].visible) 
 			{
-				personMonths += FactoryState.workplaceCostsPerYear;
+				personMonths += FactoryState.workplaceCostsPerYear / 12;
 			}
 		}
 		return personMonths;

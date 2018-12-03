@@ -22,9 +22,9 @@ class DiscreteGuy extends RandomGuy
 
 	private var _maxHealth: Float;
 
-	public function new(startingWage: Float, startingExperience: Float, statingAge: Float)
+	public function new(inventoryName: String, startingWage: Float, startingExperience: Float, statingAge: Float)
 	{
-		super();
+		super(inventoryName);
 		_startingExperience = startingExperience;
 		_startingWage = startingWage;
 		_maxHealth = 1.0;
@@ -138,7 +138,7 @@ class DiscreteGuy extends RandomGuy
 		if (employeeHealth > _maxHealth)
 			employeeHealth = _maxHealth;
 
-		employeeWage = _startingWage * Math.pow(0.03, Math.ffloor(employeeAge)); // + 3 % per Year
+		employeeWage = _startingWage * Math.pow(1.03, Math.ffloor(employeeAge)); // + 3 % per Year
 
 		// Pause progress
 		switch (status)

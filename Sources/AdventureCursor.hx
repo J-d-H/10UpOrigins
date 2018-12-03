@@ -127,7 +127,7 @@ class AdventureCursor implements Cursor {
 		hoveredObject = Inventory.getItemBelowPoint(x, y);
 		if (hoveredObject != null) {
 			toolTipTop = true;
-			toolTip = Localization.getText(hoveredObject.name);
+			toolTip = hoveredObject.nameTranslated;
 			hoveredType = OrderType.InventoryItem;
 		} else if (y >= Inventory.y) {
 			toolTipTop = true;
@@ -144,7 +144,7 @@ class AdventureCursor implements Cursor {
 						if (hoveredType == OrderType.ToolTip) {
 							toolTip = Localization.getText(hoveredObject.name);
 						} else if (inventoryItem != null) {
-							toolTip = Localization.getText(inventoryItem.name + "_" + hoveredType + "_" + hoveredObject.name);
+							toolTip = Localization.getText(inventoryItem.name + "_" + hoveredType);
 						} else {
 							toolTip = Localization.getText(hoveredType + "_" + hoveredObject.name);
 						}
@@ -155,6 +155,7 @@ class AdventureCursor implements Cursor {
 			if (hoveredObject == null && inventoryItem != null)
 			{
 				hoveredType = inventoryItem.getOrder(null);
+				toolTip = Localization.getText(inventoryItem.name + "_" + hoveredType);
 			}
 		}
 		

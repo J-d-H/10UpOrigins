@@ -4,6 +4,6 @@ import kha.Assets;
 
 class Encourage extends UseableSprite {
 	public function new(px: Int, py: Int) {
-		super("Encourage", Assets.images.fist, px, py);
+		super(Keys_text.ENCOURAGE, Assets.images.fist, px, py);
 	}
 }

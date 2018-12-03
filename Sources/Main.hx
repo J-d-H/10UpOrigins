@@ -193,11 +193,16 @@ class Main {
 		lastTime = Scheduler.time();
 		font = Assets.fonts.LiberationSans_Regular;
 
+		Localization.init("localizations_xml");
+		Cfg.init();
+		Localization.language = Cfg.language;
+		Localization.buildKeys("../Assets/data/text.xml","text");
+
 		Inventory.init();
 		Inventory.pick(new Workplace(-1));
-		Inventory.pick(new DiscreteGuy(0.1, 0, 0));
-		Inventory.pick(new DiscreteGuy(0.2, 1, 2));
-		Inventory.pick(new DiscreteGuy(0.3, 3, 5));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_1, 0.1, 0, 0));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_2,0.2, 1, 2));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_3,0.3, 3, 5));
 		Inventory.pick(new manipulatables.Encourage(0,0));
 		Inventory.pick(new Injection(0,0));
 
@@ -211,7 +216,7 @@ class Main {
 		var npcSlotsPerRow = Std.int(npcSpawns.length/4);
 		var slot = Std.int(npcSpawns.length - Std.int(0.5 * npcSlotsPerRow));
 		Staff.workplaces[slot].visible = true;
-		Staff.hireGuy(slot, new DiscreteGuy(0.1, 0, 0));
+		Staff.hireGuy(slot, new DiscreteGuy(Keys_text.HIREWORKER_1, 0.1, 0, 0));
 	}
 
 	public static function initLevel(): Void {
@@ -390,7 +395,7 @@ class Main {
 			var guyDisplays : Array<StringPair> = [
 				{ key: guyBelowMouse.name, value: "" },
 				{ key: "Age: ", value: Std.string(Math.floor(guyBelowMouse.employeeAge + 18)) },
-				{ key: "Wage: ", value: Std.string(Math.floor(guyBelowMouse.employeeAge * 100) / 100) },
+				{ key: "Wage: ", value: Std.string(Math.floor(guyBelowMouse.employeeWage * 100) / 100) },
 				{ key: "Health: ", value: Std.string(Math.round(guyBelowMouse.employeeHealth * 100)) + "%" },
 				{ key: "Speed: ", value: Std.string(Math.round((5 / guyBelowMouse.employeeTimeForCan) * 100)) + "%" },
 				{ key: "Quality: ", value: Std.string(Math.round(guyBelowMouse.employeeProgressTo10UpPerCan * 100) / 100) },
