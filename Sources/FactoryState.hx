@@ -51,9 +51,9 @@ class FactoryState {
 	{
 		time += deltaTime * globalTimeSpeed;
 		yearTime += deltaTime * globalTimeSpeed;
-		if (yearTime >= 1 / 12)
+		if (yearTime >= 1)
 		{
-			yearTime -= 1 / 12;
+			yearTime -= 1;
 			var wages: Int = Math.round(Staff.calcWages());
 			lastYearsWages += wages;
 			money -= wages;

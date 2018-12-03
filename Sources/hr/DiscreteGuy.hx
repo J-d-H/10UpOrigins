@@ -18,16 +18,19 @@ class DiscreteGuy extends RandomGuy
 
 	private var _startingExperience: Float;
 	private var _startingWage: Float;
+	private var _startingAge: Float;
 
 	private var _maxHealth: Float;
 
-	public function new(inventoryName: String, startingWage: Float, startingExperience: Float, statingAge: Float)
+	public function new(inventoryName: String, startingWage: Float, startingExperience: Float, startingAge: Float)
 	{
 		super(inventoryName);
 		_startingExperience = startingExperience;
 		_startingWage = startingWage;
+		_startingAge = startingAge;
 		_maxHealth = 1.0;
-		employeeAge = statingAge;
+		employeeAge = startingAge;
+		employeeWage = startingWage;
 	}
 
 	@:access(kha2d.Animation)
@@ -137,7 +140,7 @@ class DiscreteGuy extends RandomGuy
 		if (employeeHealth > _maxHealth)
 			employeeHealth = _maxHealth;
 
-		employeeWage = _startingWage * Math.pow(1.03, Math.ffloor(employeeAge)); // + 3 % per Year
+		employeeWage = _startingWage * Math.pow(1.07, Math.ffloor(employeeAge-_startingAge)); // + 3 % per Year
 
 		// Pause progress
 		switch (status)

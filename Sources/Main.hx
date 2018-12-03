@@ -200,9 +200,9 @@ class Main {
 
 		Inventory.init();
 		Inventory.pick(new Workplace(-1));
-		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_1, 0.1, 0, 0));
-		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_2,0.2, 1, 2));
-		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_3,0.3, 3, 5));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_1, 1, 0, 0));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_2, 1.5, 1, 2));
+		Inventory.pick(new DiscreteGuy(Keys_text.HIREWORKER_3, 2, 3, 5));
 		Inventory.pick(new manipulatables.Encourage(0,0));
 		Inventory.pick(new Injection(0,0));
 
@@ -216,7 +216,7 @@ class Main {
 		var npcSlotsPerRow = Std.int(npcSpawns.length/4);
 		var slot = Std.int(npcSpawns.length - Std.int(0.5 * npcSlotsPerRow));
 		Staff.workplaces[slot].visible = true;
-		Staff.hireGuy(slot, new DiscreteGuy(Keys_text.HIREWORKER_1, 0.1, 0, 0));
+		Staff.hireGuy(slot, new DiscreteGuy(Keys_text.HIREWORKER_1, 1, 0, 0));
 	}
 
 	public static function initLevel(): Void {
