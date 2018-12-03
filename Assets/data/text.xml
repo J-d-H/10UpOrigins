@@ -5,7 +5,7 @@
 	use the default language instead.
 	I.e. the original language of this file
 -->
-<DefaultLanguage>de</DefaultLanguage>
+<DefaultLanguage>en</DefaultLanguage>
 
 <Title>
 	<de>10Up: Origins</de>
@@ -122,6 +122,6 @@
 </back>
 
 <WorkerNames>
-	<de>Augusto, Ingo, Christian, Robert, Björn, Johannes, Rebecca, Stephen, Alvar, Michael, Linh, Roger, Roman, Max, Paul, Tobias, Henno, Niko, Kai, Julian</de>
+	<en>Augusto, Ingo, Christian, Robert, Björn, Johannes, Rebecca, Stephen, Alvar, Michael, Linh, Roger, Roman, Max, Paul, Tobias, Henno, Niko, Kai, Julian</en>
 </WorkerNames>
 
