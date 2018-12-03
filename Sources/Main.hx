@@ -58,6 +58,7 @@ class Main {
 	private static var font: Font;
     private static var lastTime = 0.0;
     private static var gamePaused: Bool = false;
+    private static var gameOver: Bool = false;
 	
 	public static var Player(default, null) = "Boss";
 	public static var npcSpawns : Array<Vector2> = new Array<Vector2>();
@@ -326,7 +327,7 @@ class Main {
 		var deltaTime = Scheduler.time() - lastTime;
 		lastTime = Scheduler.time();
 		
-		if (!gamePaused)
+		if (!gamePaused && !gameOver)
 		{
 			Staff.update(deltaTime);
 			FactoryState.the.update(deltaTime);
@@ -413,7 +414,32 @@ class Main {
 		];
 		renderStatsBox(mouseScreenPosX, mouseScreenPosY, guyDisplays, g, false);
 		#end
-		if (FactoryState.the.showYearlyStatsFlag)
+
+		if (FactoryState.the.cans10up >= 100)
+		{
+			gameOver = true;
+			g.fontSize = 36;
+
+			var yearDisplays : Array<StringPair> = [
+				{ key: "CONGRATULATIONS", value: "" },
+				{ key: "", value: "" },
+				{ key: "You produced enough 10Up.", value: "" }
+			];
+			renderStatsBox(width / 2, height / 2, 15, yearDisplays, g, Center, Center);
+		}
+		else if (FactoryState.the.money < -500)
+		{
+			gameOver = true;
+			g.fontSize = 36;
+
+			var yearDisplays : Array<StringPair> = [
+				{ key: "GAME OVER", value: "" },
+				{ key: "", value: "" },
+				{ key: "You amassed too much dept.", value: "" }
+			];
+			renderStatsBox(width / 2, height / 2, 15, yearDisplays, g, Center, Center);
+		}
+		else if (FactoryState.the.showYearlyStatsFlag)
 		{
 			gamePaused = true;
 			g.fontSize = 36;
@@ -456,7 +482,7 @@ class Main {
 			renderStatsBox(width / 2, height / 2, 15, yearDisplays, g, Center, Center);
 		}
 		
-		if (!gamePaused)
+		if (!gamePaused && !gameOver)
 		{
 			adventureCursor.render(g, mouseScreenPosX, mouseScreenPosY);
 		}
