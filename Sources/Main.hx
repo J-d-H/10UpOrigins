@@ -484,7 +484,11 @@ class Main {
 		var boxWidth: Float = stringWidth + 2 * pad;
 		var boxHeight: Float = stringHeight * stats.length + pad * (stats.length + 1);
 		var xOffset: Float = hAnchor == Left ? x : (hAnchor == Right ? x - boxWidth : x - boxWidth / 2);
+		if (xOffset < 0) xOffset = 0;
+		if (xOffset + boxWidth >= width) xOffset = width - boxWidth;
 		var yOffset: Float = vAnchor == Top ? y : (vAnchor == Down ? y - boxHeight : y - boxHeight / 2);
+		if (yOffset < 0) yOffset = 0;
+		if (yOffset + boxHeight >= height + Inventory.height) yOffset = height + Inventory.height - boxHeight;
 
 		g.color = Color.Black;
 		g.fillRect(xOffset, yOffset, boxWidth, boxHeight);
