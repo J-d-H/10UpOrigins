@@ -21,9 +21,9 @@ class DiscreteGuy extends RandomGuy
 
 	private var _maxHealth: Float;
 
-	public function new(startingWage: Float, startingExperience: Float, statingAge: Float)
+	public function new(inventoryName: String, startingWage: Float, startingExperience: Float, statingAge: Float)
 	{
-		super();
+		super(inventoryName);
 		_startingExperience = startingExperience;
 		_startingWage = startingWage;
 		_maxHealth = 1.0;

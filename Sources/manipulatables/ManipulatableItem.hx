@@ -13,6 +13,7 @@ enum OrderType {
 
 interface ManipulatableItem {
 	public var name(get, null): String;
+	public var nameTranslated(get, null): String;
 	
 	public function getOrder(selectedItem : ManipulatableItem) : OrderType;
 	

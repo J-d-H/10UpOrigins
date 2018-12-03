@@ -38,9 +38,7 @@ class RandomGuy extends UseableSprite {
 	private var renderOpacity: Float = 1;
 	
 	public var sleeping: Bool;
-	
-	private static var names = ["Augusto", "Ingo", "Christian", "Robert", "Björn", "Johannes", "Rebecca", "Stephen", "Alvar", "Michael", "Linh", "Roger", "Roman", "Max", "Paul", "Tobias", "Henno", "Niko", "Kai", "Julian", "Rebecca", "Rebecca", "Rebecca", "Rebecca", "Rebecca"];
-	
+
 	private var zzzzz: Image;
 	private var zzzzzAnim: Animation;
 	
@@ -82,8 +80,10 @@ class RandomGuy extends UseableSprite {
 		return value;
 	}
 	
-	public function new(customlook: Bool = false) {
-		super(names[Random.getUpTo(names.length - 1)], Assets.images.nullachtsechzehnmann, 0, 0, Std.int(720 / 9), Std.int(256 / 2));
+	public function new(inventoryName: String = null, customlook: Bool = false)
+	{
+		var names = Localization.getText(Keys_text.WORKERNAMES).split(", ");
+		super(names[Random.getUpTo(names.length - 1)], Assets.images.nullachtsechzehnmann, 0, 0, Std.int(720 / 9), Std.int(256 / 2), 5, inventoryName);
 		collider = new Rectangle(0, 0, width, height -20);
 		renderColor = Color.White;
 		zzzzz = Assets.images.zzzzz;

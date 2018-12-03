@@ -1,5 +1,6 @@
 package hr;
 
+import haxe.display.Position.Location;
 import kha.graphics2.Graphics;
 import kha2d.Rectangle;
 import manipulatables.ManipulatableItem;
@@ -13,10 +14,14 @@ class Workplace extends UseableSprite
 	public var worker: RandomGuy;
 
 	public function new(slot: Int) {
-		if (slot < 0) super("Workplace", Assets.images.coffee, 0, 0);
-		else super("Workplace " + slot, Assets.images.coffee, Main.npcSpawns[slot].x + 60, Main.npcSpawns[slot].y + 60);
+		if (slot < 0) super(Keys_text.BUILDWORKPLACE, Assets.images.coffee, 0, 0);
+		else super(Keys_text.WORKPLACE, Assets.images.coffee, Main.npcSpawns[slot].x + 60, Main.npcSpawns[slot].y + 60);
 		this.slot = slot;
 		visible = false;
+	}
+
+	override function get_nameTranslated():String {
+		return Localization.getText(get_name(), [ Std.string(FactoryState.workplaceInitialCosts) ]);
 	}
 
 	override function render(g:Graphics) {
@@ -79,7 +84,7 @@ class Workplace extends UseableSprite
 			} else if (Std.is(item, DiscreteGuy)) {
 				// hire worker
 				var guy: DiscreteGuy = cast Inventory.getSelectedItem();
-				Staff.hireGuy(slot, new DiscreteGuy(guy.employeeWage, guy.employeeExperience, guy.employeeAge));
+				Staff.hireGuy(slot, new DiscreteGuy(guy.name, guy.employeeWage, guy.employeeExperience, guy.employeeAge));
 			}
 		default:
 			super.executeOrder(order, item);
