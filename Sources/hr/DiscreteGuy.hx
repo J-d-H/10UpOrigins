@@ -116,6 +116,8 @@ class DiscreteGuy extends RandomGuy
 			employeeProgressTo10UpPerCan = 1.0;
 		}
 
+		employeeTimeForCan /= workFactor;
+
 		var ageWorkingHealthFactor: Float = 1;
 		var agePauseHealthFactor: Float = 1;
 		var agePauseTimeFactor: Float = 1;
