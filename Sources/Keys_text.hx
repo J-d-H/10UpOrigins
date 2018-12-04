@@ -7,6 +7,7 @@ class Keys_text {
 	static public var PROFESSOR = "Professor";
 	static public var CLICK_TO_START = "click_to_start";
 	static public var WORKPLACE = "Workplace";
+	static public var TAKE_WORKER = "Take_Worker";
 	static public var ENCOURAGE = "Encourage";
 	static public var INJECTION = "Injection";
 	static public var BUILDWORKPLACE = "BuildWorkplace";

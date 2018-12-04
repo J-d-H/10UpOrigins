@@ -40,6 +40,11 @@
 
 
 <!-- Abilities -->
+<Take_Worker>
+	<de>Arbeitsplatz freimachen</de>
+	<en>Free up workspace</en>
+</Take_Worker>
+
 <Encourage>
 	<de>Ermutigen</de>
 	<en>Encourage</en>

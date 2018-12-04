@@ -1,5 +1,6 @@
 package;
 
+import hr.RandomGuy;
 import hr.Workplace;
 import kha.input.Mouse;
 import manipulatables.ManipulatableItem;
@@ -146,7 +147,14 @@ class AdventureCursor implements Cursor {
 						} else if (inventoryItem != null) {
 							toolTip = Localization.getText(inventoryItem.name + "_" + hoveredType);
 						} else {
-							toolTip = Localization.getText(hoveredType + "_" + hoveredObject.name);
+							if (Std.is(hoveredObject, RandomGuy) && hoveredType == Take)
+							{
+								toolTip = Localization.getText(hoveredType + "_Worker", [hoveredObject.name]);
+							}
+							else 
+							{
+								toolTip = Localization.getText(hoveredType + "_" + hoveredObject.name);
+							}
 						}
 					}
 					break;
