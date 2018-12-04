@@ -10,7 +10,7 @@ class FactoryState {
 	public static inline var globalTimeSpeed: Float = 1 / 20;
 	public static inline var workTimeFactor: Float = 1;
 	private static inline var moneyPerNormalCan = 1;
-	private static inline var moneyPer10upCan = 10;
+	private static inline var moneyPer10upCan = 10 + moneyPerNormalCan;
 
 	public static inline var workplaceInitialCosts = 25;
 	public static inline var workplaceCostsPerYear = 2;
@@ -19,7 +19,7 @@ class FactoryState {
 	public var yearTime: Float = 0;
 	public var months: Int = 0;
 	public var years: Int = 0;
-	public var money: Int = 100;
+	public var money: Int = 200;
 	public var cansNormal: Int = 0;
 	public var cans10up: Int = 0;
 	public var casualties: Int = 0;
