@@ -54,7 +54,7 @@
 </BuildWorkplace>
 <HireWorker_1>
 	<de>Unerfahren Arbeiter anheuern</de>
-	<en>Hire unerfahrenen worker</en>
+	<en>Hire unskilled worker</en>
 </HireWorker_1>
 <HireWorker_2>
 	<de>Arbeiter anheuern</de>
@@ -79,7 +79,7 @@
 </BuildWorkplace_WontWork>
 <HireWorker_1_WontWork>
 	<de>Unerfahren Arbeiter anheuern</de>
-	<en>Hire unerfahrenen worker</en>
+	<en>Hire unskilled worker</en>
 </HireWorker_1_WontWork>
 <HireWorker_2_WontWork>
 	<de>Arbeiter anheuern</de>
@@ -104,7 +104,7 @@
 </BuildWorkplace_UseItem>
 <HireWorker_1_UseItem>
 	<de>Unerfahren Arbeiter anheuern</de>
-	<en>Hire unerfahrenen worker</en>
+	<en>Hire unskilled worker</en>
 </HireWorker_1_UseItem>
 <HireWorker_2_UseItem>
 	<de>Arbeiter anheuern</de>
@@ -122,6 +122,7 @@
 </back>
 
 <WorkerNames>
-	<en>Augusto, Ingo, Christian, Robert, Björn, Johannes, Rebecca, Stephen, Alvar, Michael, Linh, Roger, Roman, Max, Paul, Tobias, Henno, Niko, Kai, Julian</en>
+	<de>Augusto, Ingo, Christian, Robert, Björn, Johannes, Rebecca, Stephen, Alvar, Michael, Linh, Roger, Roman, Max, Paul, Tobias, Henno, Niko, Kai, Julian, Oskar, Steven, Holger, Phillip, Horst, Maria, Julia, Judit, Jens, Tommy, Dennis, Blubb der Grausame</de>
+	<en>Augusto, Ingo, Christian, Robert, Björn, Johannes, Rebecca, Stephen, Alvar, Michael, Linh, Roger, Roman, Max, Paul, Tobias, Henno, Niko, Kai, Julian, Oscar, Steven, Holger, Phillip, Hosrt, Mary, Julia, Judith, Jens, Tommy, Dennis, Blubb the Gruesome</en>
 </WorkerNames>
 
