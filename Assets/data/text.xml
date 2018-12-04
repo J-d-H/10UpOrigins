@@ -115,6 +115,53 @@
 	<en>Hire experienced worker</en>
 </HireWorker_3_UseItem>
 
+<!-- Pause texts -->
+
+<PauseHappyCount>
+	<en>2</en>
+</PauseHappyCount>
+<Pause_Happy_1>
+	<en>I like my work.</en>
+</Pause_Happy_1>
+<Pause_Happy_2>
+	<en>Best employer ever!</en>
+</Pause_Happy_2>
+
+<PauseNormalCount>
+	<en>2</en>
+</PauseNormalCount>
+<Pause_Normal_1>
+	<en>Uffz.</en>
+</Pause_Normal_1>
+<Pause_Normal_2>
+	<en>Time to eat.</en>
+</Pause_Normal_2>
+
+<PauseDruggedCount>
+	<en>2</en>
+</PauseDruggedCount>
+<Pause_Drugged_1>
+	<en>Work is killing me...</en>
+</Pause_Drugged_1>
+<Pause_Drugged_2>
+	<en>Look all those flowers...</en>
+</Pause_Drugged_2>
+
+<PauseUnhappyCount>
+	<en>3</en>
+</PauseUnhappyCount>
+<Pause_Unhappy_1>
+	<en>I'm too old for this.</en>
+</Pause_Unhappy_1>
+<Pause_Unhappy_2>
+	<en>I hired for the good wages,
+but at what cost?</en>
+</Pause_Unhappy_2>
+<Pause_Unhappy_3>
+	<en>Ouch! My back...</en>
+</Pause_Unhappy_3>
+
+
 <!-- misc -->
 <back>
 	<de>Zurück</de>

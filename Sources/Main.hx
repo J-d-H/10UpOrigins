@@ -1,5 +1,6 @@
 package;
 
+import dialogue.BlaBox;
 import hr.RandomGuy;
 import hr.Workplace;
 import hr.DiscreteGuy;
@@ -347,7 +348,7 @@ class Main {
 			Scene.the.camy = Std.int(Math.min(Scene.the.camy, Scene.the.getHeight() - Std.int(height / 2)));
 
 			Scene.the.update();
-		
+
 			Inventory.update();
 			adventureCursor.update(mouseScreenPosX, mouseScreenPosY);
 		}
@@ -364,8 +365,8 @@ class Main {
 		
 		g.transformation = FastMatrix3.identity();
 
-		//BlaBox.render(g);
 		Inventory.paint(g);
+		BlaBox.renderAll(g);
 
 		g.font = font;
 		g.fontSize = 24;

@@ -1,10 +1,11 @@
 package hr;
 
+import kha.math.Random;
+import dialogue.BlaBox;
 import manipulatables.Encourage;
 import manipulatables.Injection;
 import manipulatables.ManipulatableItem;
 import hr.RandomGuy;
-import manipulatables.UseableSprite;
 import manipulatables.ManipulatableItem.OrderType;
 import sprites.Blood;
 
@@ -198,6 +199,55 @@ class DiscreteGuy extends RandomGuy
 					// Needs pause
 					if (employeeTimeToNextPause <= 0)
 					{
+						if (Random.getIn(0,1) > 0)
+						{
+							var blaTxtKey: String = null;
+							if (status == WorkerWorkingHard)
+							{
+								var count = Std.parseInt(Localization.getText(Keys_text.PAUSEDRUGGEDCOUNT));
+								if (count > 0)
+								{
+									var i = Random.getIn(1, count);
+									blaTxtKey = "Pause_Drugged_" + i;
+								}
+							}
+							else if (status == WorkerWorkingMotivated)
+							{
+								var count = Std.parseInt(Localization.getText(Keys_text.PAUSEHAPPYCOUNT));
+								if (count > 0)
+								{
+									var i = Random.getIn(1, count);
+									blaTxtKey = "Pause_Happy_" + i;
+								}
+							}
+							else if (employeeHealth > 0.7)
+							{
+								var count = Std.parseInt(Localization.getText(Keys_text.PAUSENORMALCOUNT));
+								if (count > 0)
+								{
+									var i = Random.getIn(1, count);
+									blaTxtKey = "Pause_Normal_" + i;
+								}
+							}
+							else 
+							{
+								var count = Std.parseInt(Localization.getText(Keys_text.PAUSEUNHAPPYCOUNT));
+								if (count > 0)
+								{
+									var i = Random.getIn(1, count);
+									blaTxtKey = "Pause_Unhappy_" + i;
+								}
+							}
+
+							if (blaTxtKey != null)
+							{
+								//BlaBox.boxes.push(new BlaBox("Work is killing me...", this));
+								BlaBox.boxes.push(
+									new BlaBox(Localization.getText(blaTxtKey), this)
+								);
+							}
+						}
+
 						employeeTimeToNextPause += timeToPause;
 						status = WorkerPause;
 					}

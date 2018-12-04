@@ -25,6 +25,19 @@ class Keys_text {
 	static public var HIREWORKER_1_USEITEM = "HireWorker_1_UseItem";
 	static public var HIREWORKER_2_USEITEM = "HireWorker_2_UseItem";
 	static public var HIREWORKER_3_USEITEM = "HireWorker_3_UseItem";
+	static public var PAUSEHAPPYCOUNT = "PauseHappyCount";
+	static public var PAUSE_HAPPY_1 = "Pause_Happy_1";
+	static public var PAUSE_HAPPY_2 = "Pause_Happy_2";
+	static public var PAUSENORMALCOUNT = "PauseNormalCount";
+	static public var PAUSE_NORMAL_1 = "Pause_Normal_1";
+	static public var PAUSE_NORMAL_2 = "Pause_Normal_2";
+	static public var PAUSEDRUGGEDCOUNT = "PauseDruggedCount";
+	static public var PAUSE_DRUGGED_1 = "Pause_Drugged_1";
+	static public var PAUSE_DRUGGED_2 = "Pause_Drugged_2";
+	static public var PAUSEUNHAPPYCOUNT = "PauseUnhappyCount";
+	static public var PAUSE_UNHAPPY_1 = "Pause_Unhappy_1";
+	static public var PAUSE_UNHAPPY_2 = "Pause_Unhappy_2";
+	static public var PAUSE_UNHAPPY_3 = "Pause_Unhappy_3";
 	static public var BACK = "back";
 	static public var WORKERNAMES = "WorkerNames";
 }
