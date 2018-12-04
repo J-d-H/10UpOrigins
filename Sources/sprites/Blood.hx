@@ -23,6 +23,6 @@ class Blood extends Sprite {
 		super.update();
 		angle += 0.1;
 		--count;
-		if (count < 0) Scene.the.removeOther(this);
+		if (count < 0) Scene.the.removeProjectile(this);
 	}
 }

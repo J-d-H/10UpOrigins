@@ -211,6 +211,7 @@ class DiscreteGuy extends RandomGuy
 							++employeeCans10up;
 							FactoryState.the.onCanProduced(true);
 							new manipulatables.Can10up(x + width / 2, y);
+							sprites.Star.createEffect(x + width / 2, y);
 						}
 						else
 						{
