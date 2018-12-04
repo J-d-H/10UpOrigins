@@ -23,6 +23,7 @@ class FactoryState {
 	public var cansNormal: Int = 0;
 	public var cans10up: Int = 0;
 	public var casualties: Int = 0;
+	public var workplaceBuild: Int = 0;
 	
 	private var lastYears: Int = 0;
 	private var lastYearsIncome: Int = 0;
@@ -31,6 +32,7 @@ class FactoryState {
 	private var lastYearsCansNormal: Int = 0;
 	private var lastYearsCans10up: Int = 0;
 	private var lastYearsCasualties: Int = 0;
+	private var lastYearsWorkplaceBuild: Int = 0;
 
 	public var showYearlyStatsFlag: Bool = false;
 	public var yearlyIncome: Array<Int> = new Array<Int>();
@@ -57,7 +59,7 @@ class FactoryState {
 		{
 			yearTime -= 1;
 			var wages: Float = Staff.calcWages();
-			var costs: Float = Staff.calcWorkplaceCosts();
+			var costs: Float = Staff.calcWorkplaceCosts() + (workplaceBuild - lastYearsWorkplaceBuild) * workplaceInitialCosts;
 			lastYearsWages += Math.round(wages);
 			lastYearsCosts += Math.round(costs);
 			money -= Math.round(wages + costs);
@@ -81,6 +83,7 @@ class FactoryState {
 			lastYearsCansNormal = cansNormal;
 			lastYearsCans10up = cans10up;
 			lastYearsCasualties = casualties;
+			lastYearsWorkplaceBuild = workplaceBuild;
 			lastYears = years;
 		}
 	}

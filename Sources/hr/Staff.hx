@@ -47,13 +47,6 @@ class Staff
 				personMonths += Math.min(1, allguys[i].employeeAge) * allguys[i].employeeWage;
 			}
 		}
-		for (i in 0...workplaces.length)
-		{
-			if (workplaces[i].visible) 
-			{
-				personMonths += FactoryState.workplaceCostsPerYear;
-			}
-		}
 		return personMonths;
 	}
 

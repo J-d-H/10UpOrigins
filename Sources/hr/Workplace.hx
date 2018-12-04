@@ -81,6 +81,7 @@ class Workplace extends UseableSprite
 				// build workplace
 				visible = true;
 				FactoryState.the.money -= FactoryState.workplaceInitialCosts;
+				++FactoryState.the.workplaceBuild;
 			} else if (Std.is(item, DiscreteGuy)) {
 				// hire worker
 				var guy: DiscreteGuy = cast Inventory.getSelectedItem();
