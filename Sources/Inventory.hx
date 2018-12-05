@@ -80,9 +80,11 @@ class Inventory {
 	
 	public static function update(): Void
 	{
-		for (i in offset...items.length) {
+		var i = items.length-1;
+		while (i >= 0) {
 			var item = items[i];
 			item.update();
+			--i;
 		}
 	}
 
